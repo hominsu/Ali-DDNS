@@ -30,6 +30,7 @@ jobs:
       - name: Build
         run: |
           go get -d -v ./...
+          make init
           make all
           make build
 
