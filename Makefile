@@ -9,14 +9,6 @@ init:
 	go get -u google.golang.org/protobuf/cmd/protoc-gen-go
 	go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
-.PHONY: config
-# generate internal proto
-config:
-	protoc --proto_path=. \
-	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:. \
-	       $(INTERNAL_PROTO_FILES)
-
 .PHONY: api
 # generate api proto
 api:
@@ -40,7 +32,6 @@ generate:
 # generate all
 all:
 	make api;
-	make config;
 	make generate;
 
 # show help
