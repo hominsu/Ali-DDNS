@@ -29,14 +29,12 @@ jobs:
 
       - name: Build
         run: |
+          sudo apt install -y protobuf-compiler
+          export PATH="$PATH:$(go env GOPATH)/bin"
           go get -d -v ./...
           make init
           make all
           make build
-
-      - name: Test
-        working-directory: ${{ github.workspace }}/build
-        run: ctest -C ${{ matrix.build_type }} > CTest-${{ matrix.build_type }}-${{ matrix.os }}.log
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1

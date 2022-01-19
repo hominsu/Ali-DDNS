@@ -19,7 +19,7 @@
 <h3 align="center">Ali-DDNS</h3>
 
   <p align="center">
-    绳驱并联机器人后端
+    DDNS service by using Ali openapi
     <br />
     <a href="https://github.com/hominsu/Ali-DDNS"><strong>Explore the docs »</strong></a>
     <br />
@@ -34,7 +34,7 @@
 
 ## Description
 
-此 Docker 镜像用于释放绳驱并联机器人的后端服务器，镜像基于 golang:alpine 进行构建。
+DDNS service by using Ali openapi
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
