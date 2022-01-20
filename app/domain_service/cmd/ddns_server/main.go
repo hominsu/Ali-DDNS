@@ -4,6 +4,7 @@ import (
 	"Ali-DDNS/app/domain_service/internal/domain_task/conf"
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -12,6 +13,16 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+)
+
+// go build -ldflags "-X main.Version=x.y.z"
+var (
+	// Name is the name of the compiled software.
+	Name string
+	// Version is the version of the compiled software.
+	Version string
+
+	id, _ = os.Hostname()
 )
 
 type grpcService struct {
@@ -25,13 +36,19 @@ type ginService struct {
 	serve func(stop chan struct{}, hs *http.Server) error
 }
 
-// App contain grpc serve and gin http serve
-type App struct {
-	gs *grpcService
-	hs *ginService
+type cronService struct {
+	cr    *cron.Cron
+	serve func(stop chan struct{}, cr *cron.Cron) error
 }
 
-func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine) *App {
+// App contain grpc serve and gin http serve
+type App struct {
+	grpcService *grpcService
+	ginService  *ginService
+	cronService *cronService
+}
+
+func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine, cronConf *cron.Cron) *App {
 	grpcListener, err := net.Listen(conf.Basic().RpcNetwork(), ":"+conf.Basic().RpcPort())
 	if err != nil {
 		log.Fatal(err)
@@ -67,38 +84,56 @@ func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine) *App {
 		return hs.ListenAndServe()
 	}
 
+	cronServe := func(stop chan struct{}, cr *cron.Cron) error {
+		go func(stop chan struct{}, cr *cron.Cron) {
+			<-stop
+			cr.Stop()
+		}(stop, cr)
+
+		cr.Run()
+		return nil
+	}
+
 	return &App{
-		gs: &grpcService{
+		grpcService: &grpcService{
 			gs:    grpcServer,
 			lis:   &grpcListener,
 			serve: grpcServe,
 		},
-		hs: &ginService{
+		ginService: &ginService{
 			hs:    &ginServer,
 			serve: ginServe,
+		},
+		cronService: &cronService{
+			cr:    cronConf,
+			serve: cronServe,
 		},
 	}
 }
 
-func (a *App) start(stop chan struct{}, done chan bool, errors chan error) {
+func (a *App) start(stop chan struct{}, errors chan error) {
 	// set gin to release mode
 	gin.SetMode(gin.ReleaseMode)
 
+	// cron server
+	go func() {
+		errors <- a.cronService.serve(stop, a.cronService.cr)
+	}()
+
 	// grpc server
 	go func() {
-		errors <- a.gs.serve(stop, a.gs.gs, a.gs.lis)
+		errors <- a.grpcService.serve(stop, a.grpcService.gs, a.grpcService.lis)
 	}()
 
 	// web server
 	go func() {
-		errors <- a.hs.serve(stop, a.hs.hs)
+		errors <- a.ginService.serve(stop, a.ginService.hs)
 	}()
-
-	// blocking waiting to exit
-	<-done
 }
 
 func main() {
+	log.Printf("service.id: %v, service.name: %v, service.version: %v", id, Name, Version)
+
 	done := make(chan bool)
 	ch := make(chan os.Signal)
 
@@ -118,15 +153,18 @@ func main() {
 
 	// stop channel use to control all server's status, error channel use to receive the server error
 	stop := make(chan struct{})
-	errors := make(chan error, 2)
+	errors := make(chan error, 3)
 
-	app, redisCleanup, err := initApp()
+	app, dataRepoCleanup, err := initApp()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer redisCleanup()
+	defer dataRepoCleanup()
 
-	app.start(stop, done, errors)
+	app.start(stop, errors)
+
+	// blocking waiting to exit
+	<-done
 
 	// smooth exit
 	close(stop)

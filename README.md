@@ -1,12 +1,14 @@
 <div id="top"></div>
 
 <!-- PROJECT SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
-[![Build][build-shield]][build-url]
+<p align="center">
+<a href="https://github.com/hominsu/Ali-DDNS/graphs/contributors"><img src="https://img.shields.io/github/contributors/hominsu/XFileCrypt.svg?style=for-the-badge" alt="Contributors"></a>
+<a href="https://github.com/hominsu/Ali-DDNS/network/members"><img src="https://img.shields.io/github/forks/hominsu/Ali-DDNS.svg?style=for-the-badge" alt="Forks"></a>
+<a href="https://github.com/hominsu/Ali-DDNS/stargazers"><img src="https://img.shields.io/github/stars/hominsu/Ali-DDNS.svg?style=for-the-badge" alt="Stargazers"></a>
+<a href="https://github.com/hominsu/Ali-DDNS/issues"><img src="https://img.shields.io/github/issues/hominsu/Ali-DDNS.svg?style=for-the-badge" alt="Issues"></a>
+<a href="https://github.com/hominsu/Ali-DDNS/blob/master/LICENSE"><img src="https://img.shields.io/github/license/hominsu/Ali-DDNS.svg?style=for-the-badge" alt="License"></a>
+<a href="https://github.com/hominsu/Ali-DDNS/actions/workflows/code_ql_analysis.yml"><img src="https://img.shields.io/github/workflow/status/hominsu/Ali-DDNS/CodeQL%20Analysis?style=for-the-badge" alt="CodeQL"></a>
+</p>
 
 
 <!-- PROJECT LOGO -->
@@ -35,19 +37,3 @@
 ## Description
 
 DDNS service by using Ali openapi
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/hominsu/XFileCrypt.svg?style=for-the-badge
-[contributors-url]: https://github.com/hominsu/Ali-DDNS/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/hominsu/Ali-DDNS.svg?style=for-the-badge
-[forks-url]: https://github.com/hominsu/Ali-DDNS/network/members
-[stars-shield]: https://img.shields.io/github/stars/hominsu/Ali-DDNS.svg?style=for-the-badge
-[stars-url]: https://github.com/hominsu/Ali-DDNS/stargazers
-[issues-shield]: https://img.shields.io/github/issues/hominsu/Ali-DDNS.svg?style=for-the-badge
-[issues-url]: https://github.com/hominsu/Ali-DDNS/issues
-[license-shield]: https://img.shields.io/github/license/hominsu/Ali-DDNS.svg?style=for-the-badge
-[license-url]: https://github.com/hominsu/Ali-DDNS/blob/master/LICENSE
-[build-shield]: https://img.shields.io/github/workflow/status/hominsu/Ali-DDNS/CodeQL%20Analysis?style=for-the-badge
-[build-url]: https://github.com/hominsu/Ali-DDNS/actions/workflows/code_ql_analysis.yml

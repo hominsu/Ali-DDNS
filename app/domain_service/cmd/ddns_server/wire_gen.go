@@ -31,7 +31,12 @@ func initApp() (*App, func(), error) {
 	domainTaskService := service.NewDomainTaskService(delayCheckUsecase, domainRecordUsecase, domainUserUsecase)
 	grpcServer := server.NewGRPCServer(domainTaskService)
 	engine := server.NewGinServer(domainTaskService)
-	app := newApp(grpcServer, engine)
+	cron, err := server.NewCronServer(domainTaskService)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	app := newApp(grpcServer, engine, cron)
 	return app, func() {
 		cleanup()
 	}, nil
