@@ -13,7 +13,7 @@ import (
 	"github.com/google/wire"
 )
 
-// initApp init kratos application.
+// initApp init ddns server application.
 func initApp() (*App, func(), error) {
 	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, newApp))
 }

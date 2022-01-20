@@ -15,7 +15,7 @@ import (
 
 // Injectors from wire.go:
 
-// initApp init kratos application.
+// initApp init ddns server application.
 func initApp() (*App, func(), error) {
 	client := data.NewRedisClient()
 	dataData, cleanup, err := data.NewData(client)
