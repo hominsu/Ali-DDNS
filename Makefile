@@ -12,3 +12,8 @@ wire:
 # generate proto
 proto:
 	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) proto'
+
+.PHONY: build
+# generate build
+build:
+	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) build'
