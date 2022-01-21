@@ -1,20 +1,26 @@
-#build stage
+# build stage
 FROM golang:alpine AS builder
-
+# app dir
 ARG APP_RELATIVE_PATH
-
-RUN apk add --no-cache git
-
-COPY ddns_server /src
+# change apk source to ali
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk update && apk upgrade
+# intstall git build-base
+RUN apk add --no-cache git make
+# build app
+COPY . /src
 WORKDIR /src/app/${APP_RELATIVE_PATH}
-
-RUN go env -w GOPROXY=https://goproxy.cn,direct && go get -d -v ./...
-RUN make build
+RUN GOPROXY=https://goproxy.cn,direct make build
 
 #final stage
 FROM alpine:latest
+# app dir
+ARG APP_RELATIVE_PATH
+# change apk source to ali
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk update && apk upgrade
+# install: tzdata ca-certificates
 RUN apk --no-cache add tzdata ca-certificates
+# cpoy the app from builder
 COPY --from=builder /src/app/${APP_RELATIVE_PATH}/bin /app
-ENTRYPOINT /app
-LABEL Name=hominsu/ali-ddns-server Version=1.1
+WORKDIR /app
 EXPOSE 50001 50002
+CMD ["./server"]

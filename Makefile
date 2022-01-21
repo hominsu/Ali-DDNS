@@ -17,3 +17,13 @@ proto:
 # generate build
 build:
 	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) build'
+
+.PHONY: docker
+# generate docker
+docker:
+	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) docker'
+
+.PHONY: buildx
+# generate buildx
+buildx:
+	find app -type d -depth 2 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) buildx'
