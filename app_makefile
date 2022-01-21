@@ -4,8 +4,8 @@ APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && cd .. && b=`basename $$PWD` && e
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell cd ../../../api/$(APP_RELATIVE_PATH) && find . -name *.proto)
 APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
-DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":1.2.0"}')
-BUILDX_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":latest"}')
+DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":$(VERSION)"}')
+BUILDX_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":$(VERSION)"}')
 
 .PHONY: init
 # init env
