@@ -1,38 +1,84 @@
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
+APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && cd .. && b=`basename $$PWD` && echo $$b/$$a)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
-API_PROTO_FILES=$(shell find api -name *.proto)
+API_PROTO_FILES=$(shell cd ../../../api/$(APP_RELATIVE_PATH) && find . -name *.proto)
+APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
+DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":0.1.0"}')
 
 .PHONY: init
 # init env
 init:
-	go install google.golang.org/protobuf/cmd/protoc-gen-go
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+	go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	go get -u github.com/google/wire/cmd/wire
+	go get -u github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
-.PHONY: api
-# generate api proto
-api:
+.PHONY: grpc
+# generate grpc code
+grpc:
+	 cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           --go-grpc_out=paths=source_relative:. \
+           $(API_PROTO_FILES)
+
+.PHONY: swagger
+# generate swagger
+swagger:
+	cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+	        --proto_path=../../../third_party \
+	        --openapiv2_out . \
+	        --openapiv2_opt logtostderr=true \
+           $(API_PROTO_FILES)
+
+.PHONY: proto
+# generate internal proto struct
+proto:
 	protoc --proto_path=. \
-	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:. \
- 	       --go-grpc_out=paths=source_relative:. \
-	       $(API_PROTO_FILES)
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           $(INTERNAL_PROTO_FILES)
+
+.PHONY: generate
+# generate client code
+generate:
+	go generate ./...
 
 .PHONY: build
 # build
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
-.PHONY: generate
-# generate
-generate:
-	go generate ./...
+.PHONY: test
+# test
+test:
+	go test -v ./... -cover
+
+.PHONY: run
+run:
+	cd cmd/server/ && go run .
+
+.PHONY: ent
+ent:
+	cd internal/data/ && ent generate ./ent/schema
+
+.PHONY: docker
+docker:
+	cd ../../.. && docker build -f deploy/build/Dockerfile --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) -t $(DOCKER_IMAGE) .
+
+.PHONY: wire
+# generate wire
+wire:
+	cd cmd/server && wire
+
+.PHONY: api
+# generate api proto
+api: grpc swagger
 
 .PHONY: all
 # generate all
-all:
-	make api;
-	make generate;
+all: grpc proto generate build test
 
 # show help
 help:

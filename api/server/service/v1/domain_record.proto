@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package domain_record.v1;
+
+option go_package = "Ali-DDNS/api/domain_record/v1;v1";
+
+message DRRequest {
+  string domain_name = 1;
+}
+
+message DRResponse {
+  string domain_records = 1;
+}
+
+message UpdateDomainRequest {
+  string domain_name = 1;
+  string record_id = 2;
+  string rr = 3;
+  string type = 4;
+  string value = 5;
+}
+
+message UpdateDomainResponse {
+  string request_id = 1;
+  string record_id = 2;
+}
+
+service DomainService {
+  rpc GetDomainRecord(DRRequest) returns (DRResponse) {};
+  rpc UpdateDomainRecord(UpdateDomainRequest) returns (UpdateDomainResponse) {};
+}
+
+// protoc --proto_path=proto/ --go_out=. --go-grpc_out=. ./proto/DomainRecord.proto
