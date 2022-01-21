@@ -27,15 +27,6 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
 
-      - name: Build
-        run: |
-          sudo apt install -y protobuf-compiler
-          export PATH="$PATH:$(go env GOPATH)/bin"
-          go get -d -v ./...
-          make init
-          make all
-          make build
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
 
