@@ -4,8 +4,8 @@ APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && cd .. && b=`basename $$PWD` && e
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell cd ../../../api/$(APP_RELATIVE_PATH) && find . -name *.proto)
 APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
-DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":$(VERSION)"}')
-BUILDX_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":$(VERSION)"}')
+DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":"}')
+BUILDX_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "hominsu/ali-ddns-" $$0 ":"}')
 
 .PHONY: init
 # init env
@@ -62,11 +62,14 @@ run:
 
 .PHONY: docker
 docker:
-	cd ../../.. && docker build -f deploy/build/Dockerfile --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) -t $(DOCKER_IMAGE) .
+	cd ../../.. && \
+	docker build -f deploy/build/Dockerfile --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) -t $(DOCKER_IMAGE)$(VERSION) .
 
 .PHONY: buildx
 buildx:
-	cd ../../.. && docker buildx build -t $(BUILDX_IMAGE) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64 -f deploy/build/Dockerfile . --push
+	cd ../../.. && \
+	docker buildx build -t $(BUILDX_IMAGE)$(VERSION) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64 -f deploy/build/Dockerfile . --push && \
+	docker buildx build -t $(BUILDX_IMAGE)latest --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64 -f deploy/build/Dockerfile . --push
 
 
 .PHONY: wire
