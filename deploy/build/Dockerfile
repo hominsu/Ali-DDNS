@@ -7,7 +7,7 @@ RUN apk add --no-cache git make
 # build app
 COPY . /src
 WORKDIR /src/app/${APP_RELATIVE_PATH}
-RUN GOPROXY=https://goproxy.cn,direct make build
+RUN make build
 
 #final stage
 FROM alpine:latest
