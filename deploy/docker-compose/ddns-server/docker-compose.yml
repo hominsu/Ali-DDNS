@@ -32,7 +32,7 @@ services:
           - redis-session
 
   # 主服务
-  ali-ddns-server:
+  ali-ddns-server-service:
     # 阿里云仓库: registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-server-service
     # DockerHub: hominsu/ali-ddns-server-service
     image: hominsu/ali-ddns-server-service:latest
