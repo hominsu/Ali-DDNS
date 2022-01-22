@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  ali-ddns-client:
+    # 阿里云仓库: registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-client
+    # DockerHub: hominsu/ali-ddns-client
+    image: hominsu/ali-ddns-client-service:1.2.0
+    container_name: ali-ddns-client-service
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai" # 时区
+      ALIDDNSCLIENT_BASIC_ENDPOINT: "alidns.cn-shenzhen.aliyuncs.com"               # 阿里云服务地址
+      ALIDDNSCLIENT_BASIC_DOMAIN_NAME: "haomingsu.cn"                               # 需要更新主机记录的域名
+      ALIDDNSCLIENT_BASIC_RR: "home"                                                # 需要更新的记录值
+      ALIDDNSCLIENT_BASIC_RPC_URL: "ddns.haomingsu.cn"                              # RPC 服务地址
+      ALIDDNSCLIENT_BASIC_RPC_PORT: "50002"                                         # RPC 服务端口
+      ALIDDNSCLIENT_OPTION_TTL: "600"                                               # 每隔多少秒向服务端获取更新信息
+      ALIDDNSCLIENT_OPTION_DELAY_CHECK_CRON: "CRON_TZ=Asia/Shanghai 2/3 2-4 * * *"  # 每天的 2-4 点的 2m 开始，每 3m 执行一次
+      ALIDDNSCLIENT_OPTION_SHOW_EACH_GET_IP: "true"                                 # 每一次获取 IP 的结果都显示
+    volumes:
+      - ./cert:/cert
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge

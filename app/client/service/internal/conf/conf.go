@@ -15,7 +15,6 @@ var (
 		basicEndpoint:        "ALIDDNSCLIENT_BASIC_ENDPOINT",
 		basicDomainName:      "ALIDDNSCLIENT_BASIC_DOMAIN_NAME",
 		basicRR:              "ALIDDNSCLIENT_BASIC_RR",
-		basicGetIpUrl:        "ALIDDNSCLIENT_BASIC_GET_IP_URL",
 		basicRpcUrl:          "ALIDDNSCLIENT_BASIC_RPC_URL",
 		basicRpcPort:         "ALIDDNSCLIENT_BASIC_RPC_PORT",
 		optionTtl:            "ALIDDNSCLIENT_OPTION_TTL",
@@ -28,7 +27,6 @@ type envDef struct {
 	basicEndpoint        string
 	basicDomainName      string
 	basicRR              string
-	basicGetIpUrl        string
 	basicRpcUrl          string
 	basicRpcPort         string
 	optionTtl            string
@@ -52,7 +50,7 @@ func init() {
 		if value := os.Getenv(valueOfEnv.Field(i).String()); value != "" {
 			setEnv(typeOfEnv.Field(i).Name, value)
 		} else {
-			log.Println("Env should not be empty")
+			log.Printf("env %v should not be empty\n", valueOfEnv.Field(i).String())
 			os.Exit(-1)
 		}
 	}
@@ -66,8 +64,6 @@ func setEnv(key, value string) {
 		basic.domainName = value
 	case "basicRR":
 		basic.rr = value
-	case "basicGetIpUrl":
-		basic.getIpUrl = value
 	case "basicRpcUrl":
 		basic.rpcUrl = value
 	case "basicRpcPort":

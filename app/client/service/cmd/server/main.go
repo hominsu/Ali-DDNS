@@ -51,6 +51,7 @@ func (a *App) start(stop chan struct{}, errors chan error) {
 	// cron server
 	go func() {
 		errors <- a.cronService.serve(stop, a.cronService.cr)
+		log.Println("cron service stop...")
 	}()
 }
 

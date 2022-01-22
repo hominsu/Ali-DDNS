@@ -27,7 +27,7 @@ func (r *domainUserRepo) IsUserExists(ctx context.Context, du *biz.DomainUser) (
 	if du.Username == "" {
 		return false, terrors.New("username should not be empty")
 	}
-	return r.data.db.HExists("user", du.Username).Result()
+	return r.data.db.HExists("users", du.Username).Result()
 }
 
 func (r *domainUserRepo) GetUserPassword(ctx context.Context, du *biz.DomainUser) (string, error) {
