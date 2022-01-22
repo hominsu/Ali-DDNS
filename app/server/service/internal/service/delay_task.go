@@ -5,6 +5,7 @@ import (
 	"Ali-DDNS/internal/openapi"
 	"context"
 	"encoding/json"
+	terrors "github.com/pkg/errors"
 	"log"
 	"time"
 )
@@ -33,7 +34,7 @@ func (s *DomainTaskService) AddTask(ctx context.Context, domainName string) erro
 					DomainName: domainName,
 				})
 				if err != nil {
-					log.Println(err.Error())
+					log.Println(err)
 					return
 				}
 				s.Check(ctx, domainName)
@@ -55,7 +56,7 @@ func (s *DomainTaskService) Check(ctx context.Context, domainName string) bool {
 	// obtain the corresponding domain name records through ali openapi
 	records, err := openapi.DescribeDRecords(domainName)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(terrors.Wrap(err, "describe domain records failed"))
 		return true
 	}
 
@@ -63,7 +64,7 @@ func (s *DomainTaskService) Check(ctx context.Context, domainName string) bool {
 	for _, domainRecord := range records.DomainRecords.Records {
 		bytes, err := json.Marshal(domainRecord)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			continue
 		}
 		if _, err = s.domainRecordUsecase.SetDomainRecord(ctx, &biz.DomainRecord{
@@ -71,7 +72,7 @@ func (s *DomainTaskService) Check(ctx context.Context, domainName string) bool {
 			RR:         domainRecord.RR,
 			Value:      string(bytes),
 		}); err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			continue
 		}
 	}
@@ -82,7 +83,7 @@ func (s *DomainTaskService) CheckAll(ctx context.Context) {
 	// get all domain names from Redis
 	domainNames, err := s.domainUserUsecase.GetAllDomainName(ctx, nil)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return
 	}
 

@@ -7,22 +7,32 @@ import (
 	"Ali-DDNS/internal/openapi/defs/DescribeDomainRecords"
 	"context"
 	"encoding/json"
-	"google.golang.org/grpc/peer"
+	terrors "github.com/pkg/errors"
+	"io"
+	"io/ioutil"
 	"log"
-	"net"
+	"net/http"
 )
 
-// GetPeerAddr get peer ip addr
-func (s *DomainCheckService) GetPeerAddr(ctx context.Context) string {
-	var addr string
-	if pr, ok := peer.FromContext(ctx); ok {
-		if tcpAddr, ok := pr.Addr.(*net.TCPAddr); ok {
-			addr = tcpAddr.IP.String()
-		} else {
-			addr = pr.Addr.String()
-		}
+// GetIpAddr get peer ip addr
+func (s *DomainCheckService) GetIpAddr(ctx context.Context) (string, error) {
+	resp, err := http.Get("https://ifconfig.me/ip")
+	if err != nil {
+		return "", terrors.Wrap(err, "get ip address failed")
 	}
-	return addr
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(resp.Body)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", terrors.Wrap(err, "read ip response failed")
+	}
+
+	return string(body), nil
 }
 
 func (s *DomainCheckService) GetDomainRecord(ctx context.Context, domainName string) (*DescribeDomainRecords.DRecords, error) {
@@ -71,17 +81,20 @@ func (s *DomainCheckService) Check(ctx context.Context) (value string, _error er
 	for _, domainRecord := range _records.Records {
 		// 如果记录的域名为 "haomingsu.cn" 并且主机记录为 "home"
 		if domainRecord.DomainName == conf.Basic().DomainName() && domainRecord.RR == conf.Basic().RR() {
-			ip := s.GetPeerAddr(context.TODO())
-			if conf.Option().ShowEachGetIp() == "true" {
-				log.Printf("Current Address: %s, Doamin Value: %s", ip, domainRecord.Value)
-			}
-			if ip != domainRecord.Value {
-				//_, err := openapi2.UpdateDomainRecord(domainRecord.RecordId, domainRecord.RR, domainRecord.Type, ip)
-				_, err := s.UpdateDomainRecord(ctx, domainRecord.DomainName, domainRecord.RecordId, domainRecord.RR, domainRecord.Type, ip)
-				if err != nil {
-					return "", err
+			if ip, err := s.GetIpAddr(context.TODO()); err != nil {
+				return "", err
+			} else if ip != "" {
+				if conf.Option().ShowEachGetIp() == "true" {
+					log.Printf("Current Address: %s, Doamin Value: %s", ip, domainRecord.Value)
 				}
-				return ip, nil
+				if ip != domainRecord.Value {
+					//_, err := openapi2.UpdateDomainRecord(domainRecord.RecordId, domainRecord.RR, domainRecord.Type, ip)
+					_, err := s.UpdateDomainRecord(ctx, domainRecord.DomainName, domainRecord.RecordId, domainRecord.RR, domainRecord.Type, ip)
+					if err != nil {
+						return "", err
+					}
+					return ip, nil
+				}
 			}
 		}
 	}
