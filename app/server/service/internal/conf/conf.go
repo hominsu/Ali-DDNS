@@ -79,7 +79,8 @@ func init() {
 		if value := os.Getenv(valueOfEnv.Field(i).String()); value != "" {
 			setEnv(typeOfEnv.Field(i).Name, value)
 		} else {
-			envError("Env should not be empty")
+			log.Printf("env %v should not be empty\n", valueOfEnv.Field(i).String())
+			os.Exit(-1)
 		}
 	}
 }
@@ -119,19 +120,16 @@ func setEnv(key, value string) {
 	case "optionDelayCheckCron":
 		Option().delayCheckCron = value
 	default:
-		envError("Unknown Env Name")
+		log.Printf("unknown env name: %v \n", key)
+		os.Exit(-1)
 	}
 }
 
 func strToInt(value string) int {
 	ret, err := strconv.Atoi(value)
 	if err != nil {
-		envError(err.Error())
+		log.Println(err)
+		os.Exit(-1)
 	}
 	return ret
-}
-
-func envError(err string) {
-	log.Println(err)
-	os.Exit(-1)
 }
