@@ -112,22 +112,22 @@ func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine, cronConf *cron.Cron)
 }
 
 func (a *App) start(stop chan struct{}, errors chan error) {
-	// set gin to release mode
-	gin.SetMode(gin.ReleaseMode)
-
 	// cron server
 	go func() {
 		errors <- a.cronService.serve(stop, a.cronService.cr)
+		log.Println("cron service stop...")
 	}()
 
 	// grpc server
 	go func() {
 		errors <- a.grpcService.serve(stop, a.grpcService.gs, a.grpcService.lis)
+		log.Println("grpc service stop...")
 	}()
 
 	// web server
 	go func() {
 		errors <- a.ginService.serve(stop, a.ginService.hs)
+		log.Println("http service stop...")
 	}()
 }
 
