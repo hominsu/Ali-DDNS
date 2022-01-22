@@ -49,7 +49,7 @@ generate:
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION) main.Name=$(APP_NAME)" -o ./bin/ ./...
+	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION) -X main.Name=$(APP_NAME)" -o ./bin/ ./...
 
 .PHONY: test
 # test
