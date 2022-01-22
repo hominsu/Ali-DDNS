@@ -2,21 +2,17 @@
 FROM golang:alpine AS builder
 # app dir
 ARG APP_RELATIVE_PATH
-# change apk source to ali
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk update && apk upgrade
 # intstall git build-base
 RUN apk add --no-cache git make
 # build app
 COPY . /src
 WORKDIR /src/app/${APP_RELATIVE_PATH}
-RUN GOPROXY=https://goproxy.cn,direct make build
+RUN make build
 
 #final stage
 FROM alpine:latest
 # app dir
 ARG APP_RELATIVE_PATH
-# change apk source to ali
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk update && apk upgrade
 # install: tzdata ca-certificates
 RUN apk --no-cache add tzdata ca-certificates
 # cpoy the app from builder
