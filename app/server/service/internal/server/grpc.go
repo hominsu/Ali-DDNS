@@ -8,14 +8,20 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(service *service.DomainTaskService) *grpc.Server {
+func NewGRPCServer(service *service.DomainTaskService) (*grpc.Server, error) {
 	var opts []grpc.ServerOption
+
 	// get the creds then append into the grpc options
-	opts = append(opts, grpc.Creds(pkg.GetServerCreds()))
+	creds, err := pkg.GetServerCreds()
+	if err != nil {
+		return nil, err
+	}
+
+	opts = append(opts, grpc.Creds(creds))
 
 	srv := grpc.NewServer(opts...)
 
 	v1.RegisterDomainServiceServer(srv, service)
 
-	return srv
+	return srv, nil
 }

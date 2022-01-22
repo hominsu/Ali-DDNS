@@ -18,7 +18,12 @@ type Data struct {
 }
 
 func NewData() (*Data, func(), error) {
-	conn, err := grpc.Dial(conf.Basic().RpcUrl()+":"+conf.Basic().RpcPort(), grpc.WithTransportCredentials(pkg.GetClientCreds()))
+	creds, err := pkg.GetClientCreds()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	conn, err := grpc.Dial(conf.Basic().RpcUrl()+":"+conf.Basic().RpcPort(), grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Panicln(err.Error())
 	}
