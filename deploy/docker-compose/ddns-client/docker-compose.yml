@@ -4,7 +4,7 @@ services:
   ali-ddns-client:
     # 阿里云仓库: registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-client
     # DockerHub: hominsu/ali-ddns-client
-    image: hominsu/ali-ddns-client-service:1.2.0
+    image: hominsu/ali-ddns-client-service:latest
     container_name: ali-ddns-client-service
 #    build:
 #      context: .
