@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  ali-ddns-client:
+  ali-ddns-client-service:
     # 阿里云仓库: registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-client
     # DockerHub: hominsu/ali-ddns-client
     image: hominsu/ali-ddns-client-service:latest
