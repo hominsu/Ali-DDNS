@@ -12,7 +12,7 @@
 
 
 <!-- PROJECT LOGO -->
-<br />
+<br/>
 <div align="center">
 <!--   <a href="https://github.com/hominsu/Ali-DDNS">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
@@ -22,10 +22,10 @@
 
   <p align="center">
     DDNS service by using Ali openapi
-    <br />
-    <a href="https://github.com/hominsu/Ali-DDNS"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
+    <br/>
+    <a href="https://hominsu.github.io/Ali-DDNS/"><strong>Explore the docs » (you are here)</strong></a>
+    <br/>
+    <br/>
     <a href="https://github.com/hominsu/Ali-DDNS">View Demo</a>
     ·
     <a href="https://github.com/hominsu/Ali-DDNS/issues">Report Bug</a>

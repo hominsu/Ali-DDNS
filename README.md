@@ -12,7 +12,7 @@
 
 
 <!-- PROJECT LOGO -->
-<br />
+<br/>
 <div align="center">
 <!--   <a href="https://github.com/hominsu/Ali-DDNS">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
@@ -22,10 +22,10 @@
 
   <p align="center">
     DDNS service by using Ali openapi
-    <br />
-    <a href="https://github.com/hominsu/Ali-DDNS"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
+    <br/>
+    <a href="https://hominsu.github.io/Ali-DDNS"><strong>Explore the docs »</strong></a>
+    <br/>
+    <br/>
     <a href="https://github.com/hominsu/Ali-DDNS">View Demo</a>
     ·
     <a href="https://github.com/hominsu/Ali-DDNS/issues">Report Bug</a>
@@ -71,7 +71,7 @@ DDNS service by using Ali openapi
   ❯ git clone --depth=1 https://github.com/hominsu/Ali-DDNS.git
   ```
 
-- In server-service, fill in your  Ali Access-Key in the `docker-compose.yml`, set your redis db pass, also you can set 
+- In server-service, fill in your Ali Access-Key in the `docker-compose.yml`, set your redis db pass, also you can set
 
   ```yaml
   redis-ddns:
@@ -146,17 +146,16 @@ DDNS service by using Ali openapi
   ❯ docker-compose up -d
   ```
 
-
 ## Container Repository
 
-- Docker Hub: 
+- Docker Hub:
 
   ```bash
   ❯ docker pull hominsu/ali-ddns-client-service:latest
   ❯ docker pull hominsu/ali-ddns-server-service:latest
   ```
 
-- GitHub Container Repository: 
+- GitHub Container Repository:
 
   ```bash
   ❯ docker pull ghcr.io/hominsu/ali-ddns-client-service:latest
