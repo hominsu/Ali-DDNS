@@ -1,11 +1,16 @@
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
+
 APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && cd .. && b=`basename $$PWD` && echo $$b/$$a)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell cd ../../../api/$(APP_RELATIVE_PATH) && find . -name *.proto)
-APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
+
 REPO="hominsu"
-DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "$(REPO)/ali-ddns-" $$0 ":$(VERSION)"}')
+BUILD_STAMP=$(shell date -u '+%s')
+GIT_SHA1=$(shell git rev-parse HEAD)
+
+APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
+DOCKER_IMAGE=$(REPO)/$(shell echo $(APP_NAME) |awk -F '@' '{print "ali-ddns-" $$0 ":$(VERSION)"}')
 
 .PHONY: init
 # init env
@@ -49,7 +54,7 @@ generate:
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION) -X main.Name=$(APP_NAME)" -o ./bin/ ./...
+	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION) -X main.Name=ali-ddns-$(APP_NAME) -X main.GitSHA1=$(GitSHA1) -X main.BuildStamp=$(BUILD_STAMP)" -o ./bin/ ./...
 
 .PHONY: test
 # test
@@ -68,7 +73,7 @@ docker:
 .PHONY: buildx
 buildx:
 	cd ../../.. && \
-	docker buildx build -t $(DOCKER_IMAGE) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm,linux/arm64,linux/amd64 -f deploy/build/Dockerfile . --push
+	docker buildx build -t $(DOCKER_IMAGE) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x,linux/arm -f deploy/build/Dockerfile .
 
 
 .PHONY: wire
