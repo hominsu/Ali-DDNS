@@ -54,7 +54,7 @@ generate:
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION) -X main.Name=ali-ddns-$(APP_NAME) -X main.GitSHA1=$(GitSHA1) -X main.BuildStamp=$(BUILD_STAMP)" -o ./bin/ ./...
+	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION) -X main.Name=ali-ddns-$(APP_NAME) -X main.GitSHA1=$(GIT_SHA1) -X main.BuildStamp=$(BUILD_STAMP)" -o ./bin/ ./...
 
 .PHONY: test
 # test
@@ -73,7 +73,7 @@ docker:
 .PHONY: buildx
 buildx:
 	cd ../../.. && \
-	docker buildx build -t $(DOCKER_IMAGE) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/s390x,linux/arm -f deploy/build/Dockerfile .
+	docker buildx build -t $(DOCKER_IMAGE) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/arm -f deploy/build/Dockerfile .
 
 
 .PHONY: wire
