@@ -81,7 +81,7 @@ DDNS service by using Ali openapi
     command: redis-server --port 6380 --requirepass redis-ddns-password
   
   redis-session:
-  	image: redis:alpine
+    image: redis:alpine
     container_name: ali-ddns-redis-session
     # 设置 Redis 的密码，下面记得主服务中填写对应的密码
     command: redis-server --port 6381 --requirepass redis-session-password
@@ -95,19 +95,19 @@ DDNS service by using Ali openapi
     # build:
     #   context: .
     #   dockerfile: ./Dockerfile
-  	depends_on:
-    	- redis-session
+    depends_on:
+      - redis-session
       - redis-ddns
     restart: always
     environment:
     # 设置时区，不然 logs 的时间不对
     TZ: "Asia/Shanghai" # 时区
   
-  	GIN_MODE: "release"
+    GIN_MODE: "release"
   
-  	# 设置阿里云的 AK，建议使用 RAM 用户，只分配 AliyunDNSFullAccess 权限
-  	ALIDDNSSERVER_ACCESSKEY_ID: "*"            # 阿里云 AK ID
-  	ALIDDNSSERVER_ACCESSKEY_SECRET: "*"  # 阿里云 AK SECRET
+    # 设置阿里云的 AK，建议使用 RAM 用户，只分配 AliyunDNSFullAccess 权限
+    ALIDDNSSERVER_ACCESSKEY_ID: "*"            # 阿里云 AK ID
+    ALIDDNSSERVER_ACCESSKEY_SECRET: "*"  # 阿里云 AK SECRET
   
     ALIDDNSSERVER_BASIC_ENDPOINT: "alidns.cn-shenzhen.aliyuncs.com"   # 阿里云服务地址
     ALIDDNSSERVER_BASIC_WEB_PORT: "50001"                             # WEB 服务监听端口
@@ -121,12 +121,12 @@ DDNS service by using Ali openapi
     ALIDDNSSERVER_DOMAIN_RECORD_REDIS_DB: "1"                         # 保存域名信息的 Redis 数据库
   
     # 保存 session 的 Redis，要改的有 Redis 的密码，以及 session 的密码
-    ALIDDNSSERVER_SESSION_SIZE: "10"                           				# session
-    ALIDDNSSERVER_SESSION_REDIS_NETWORK: "tcp"                       	# session 协议
-    ALIDDNSSERVER_SESSION_REDIS_ADDRESS: "redis-session"             	# 保存 session 信息的 Redis 地址
-    ALIDDNSSERVER_SESSION_REDIS_PORT: "6381"           								# 保存 session 信息的 Redis 端口
-    ALIDDNSSERVER_SESSION_REDIS_PASSWORD: "redis-session-password"		# 保存 session 信息的 Redis 密码
-    ALIDDNSSERVER_SESSION_SECRET: "secret"                        		# session 密码
+    ALIDDNSSERVER_SESSION_SIZE: "10"                                  # session
+    ALIDDNSSERVER_SESSION_REDIS_NETWORK: "tcp"                        # session 协议
+    ALIDDNSSERVER_SESSION_REDIS_ADDRESS: "redis-session"              # 保存 session 信息的 Redis 地址
+    ALIDDNSSERVER_SESSION_REDIS_PORT: "6381"                          # 保存 session 信息的 Redis 端口
+    ALIDDNSSERVER_SESSION_REDIS_PASSWORD: "redis-session-password"    # 保存 session 信息的 Redis 密码
+    ALIDDNSSERVER_SESSION_SECRET: "secret"                            # session 密码
     ALIDDNSCLIENT_OPTION_TTL: "3600"                                  # 每隔多少秒向服务端获取更新信息
     ALIDDNSCLIENT_OPTION_DELAY_CHECK_CRON: "CRON_TZ=Asia/Shanghai 1/10 2-4 * * *" # 每天的 2-4 点的 1m 开始，每 10m 执行一次
   
