@@ -33,8 +33,9 @@ services:
 
   # 主服务
   ali-ddns-server-service:
-    # 阿里云仓库: registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-server-service
-    # DockerHub: hominsu/ali-ddns-server-service
+    # 阿里云仓库:  registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-server-service:latest
+    # GHCR:      ghcr.io/hominsu/ali-ddns-server-service:latest
+    # DockerHub: hominsu/ali-ddns-server-service:latest
     image: hominsu/ali-ddns-server-service:latest
     container_name: ali-ddns-server-service
 #    build:
