@@ -14,6 +14,10 @@ var (
 	Name string
 	// Version is the version of the compiled software.
 	Version string
+	// GitSHA1 is the sha1 of the HEAD
+	GitSHA1 string
+	// BuildStamp is the date of the build
+	BuildStamp string
 
 	id, _ = os.Hostname()
 )
@@ -56,7 +60,7 @@ func (a *App) start(stop chan struct{}, errors chan error) {
 }
 
 func main() {
-	log.Printf("service.id: %v, service.name: %v, service.version: %v", id, Name, Version)
+	log.Printf("service.id: %v, service.name: %v, service.version: %v, git sha1: %v, build stamp: %v", id, Name, Version, GitSHA1, BuildStamp)
 
 	done := make(chan bool)
 	ch := make(chan os.Signal)

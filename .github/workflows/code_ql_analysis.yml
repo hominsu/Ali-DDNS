@@ -3,7 +3,6 @@ name: CodeQL Analysis
 on:
   push:
     branches: [ master, dev ]
-    tags: [ '*.*.*' ]
   workflow_dispatch:
 
 jobs:

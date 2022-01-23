@@ -3,7 +3,7 @@ FROM golang:alpine AS builder
 # app dir
 ARG APP_RELATIVE_PATH
 # intstall git build-base
-RUN apk add --no-cache git make
+RUN apk add --no-cache git build-base
 # build app
 COPY . /src
 WORKDIR /src/app/${APP_RELATIVE_PATH}
