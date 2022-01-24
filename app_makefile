@@ -17,8 +17,9 @@ DOCKER_IMAGE=$(REPO)/$(shell echo $(APP_NAME) |awk -F '@' '{print "ali-ddns-" $$
 init:
 	go get -u google.golang.org/protobuf/cmd/protoc-gen-go
 	go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	go get -u github.com/google/wire/cmd/wire
+	go get -u github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 	go get -u github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+	go get -u github.com/google/wire/cmd/wire
 
 .PHONY: grpc
 # generate grpc code
@@ -27,6 +28,16 @@ grpc:
            --proto_path=../../../third_party \
            --go_out=paths=source_relative:. \
            --go-grpc_out=paths=source_relative:. \
+           $(API_PROTO_FILES)
+
+.PHONY: http
+# generate http code
+http:
+	cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           --grpc-gateway_out=paths=source_relative:. \
+           --grpc-gateway_opt logtostderr=true \
            $(API_PROTO_FILES)
 
 .PHONY: swagger
@@ -41,7 +52,7 @@ swagger:
 .PHONY: proto
 # generate internal proto struct
 proto:
-	protoc --proto_path=. \
+	cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
            --proto_path=../../../third_party \
            --go_out=paths=source_relative:. \
            $(INTERNAL_PROTO_FILES)
@@ -75,7 +86,6 @@ buildx:
 	cd ../../.. && \
 	docker buildx build -t $(DOCKER_IMAGE) --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) --platform=linux/arm64,linux/amd64,linux/ppc64le,linux/arm -f deploy/build/Dockerfile . --push
 
-
 .PHONY: wire
 # generate wire
 wire:
@@ -83,11 +93,11 @@ wire:
 
 .PHONY: api
 # generate api proto
-api: grpc swagger
+api: grpc http swagger
 
 .PHONY: all
 # generate all
-all: grpc proto generate build test
+all: grpc http proto generate build test
 
 # show help
 help:

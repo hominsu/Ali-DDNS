@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package server.service.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "api/server/service/v1;v1";
+
+message User {
+  string username = 1;
+  string password = 2;
+}
+
+message RegisterReq {
+  User user = 1;
+}
+
+message RegisterReply {
+  bool status = 1;
+}
+
+message CancelReq {
+  string username = 1;
+}
+
+message CancelReply {
+  bool status = 1;
+}
+
+message LoginReq {
+  User user = 1;
+}
+
+message LoginReply {
+  string token = 1;
+}
+
+message LogoutReq {
+  string username = 1;
+}
+
+message LogoutReply {
+  bool status = 1;
+}
+
+message ListDomainNameReq {
+  string username = 1;
+}
+
+message ListDomainNameReply {
+  repeated string domain_names = 1;
+}
+
+message CreateDomainNameReq {
+  string username = 1;
+  string domain_name = 2;
+}
+
+message CreateDomainNameReply {
+  bool status = 1;
+  string domain_name = 2;
+}
+
+message DeleteDomainNameReq {
+  string username = 1;
+  string domain_name = 2;
+}
+
+message DeleteDomainNameReply {
+  bool status = 1;
+  string domain_name = 2;
+}
+
+message ListDeviceReq {
+  string username = 1;
+}
+
+message ListDeviceReply {
+  repeated string uuid = 1;
+}
+
+message CreateDeviceReq {
+  string username = 1;
+}
+
+message CreateDeviceReply {
+  bool status = 1;
+  string uuid = 2;
+}
+
+message DeleteDeviceReq {
+  string username = 1;
+  string uuid = 2;
+}
+
+message DeleteDeviceReply {
+  bool status = 1;
+  string uuid = 2;
+}
+
+service DDNSInterface {
+  rpc Register(RegisterReq) returns (RegisterReply) {
+    option (google.api.http) = {
+      post: "/v1/register"
+      body: "user"
+    };
+  };
+
+  rpc Cancel(CancelReq) returns (CancelReply) {
+    option (google.api.http) = {
+      delete: "/v1/cancel/{username}"
+    };
+  };
+
+  rpc Login(LoginReq) returns (LoginReply){
+    option (google.api.http) = {
+      post: "/v1/login"
+      body: "user"
+    };
+  }
+
+  rpc Logout(LogoutReq) returns (LogoutReply){
+    option (google.api.http) = {
+      post: "/v1/{username}/logout"
+    };
+  }
+
+  rpc ListDomainName(ListDomainNameReq) returns (ListDomainNameReply) {
+    option (google.api.http) = {
+      get: "/v1/{username}/domain_name"
+    };
+  }
+
+  rpc CreateDomainName(CreateDomainNameReq) returns (CreateDomainNameReply) {
+    option (google.api.http) = {
+      post: "/v1/{username}/domain_name"
+      body: "*"
+    };
+  }
+
+  rpc DeleteDomainName(DeleteDomainNameReq) returns (DeleteDomainNameReply) {
+    option (google.api.http) = {
+      delete: "/v1/{username}/domain_name/{domain_name}"
+    };
+  }
+
+  rpc ListDevice(ListDeviceReq) returns (ListDeviceReply) {
+    option (google.api.http) = {
+      get: "/v1/{username}/device"
+    };
+  }
+
+  rpc CreateDevice(CreateDeviceReq) returns (CreateDeviceReply) {
+    option (google.api.http) = {
+      post: "/v1/{username}/device"
+    };
+  }
+
+  rpc DeleteDevice(DeleteDeviceReq) returns (DeleteDeviceReply) {
+    option (google.api.http) = {
+      delete: "/v1/{username}/device/{uuid}"
+    };
+  }
+}
+
+// protoc --proto_path=proto/ --go_out=. --go-grpc_out=. ./proto/DomainRecord.proto
