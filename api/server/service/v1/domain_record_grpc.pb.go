@@ -36,7 +36,7 @@ func NewDomainServiceClient(cc grpc.ClientConnInterface) DomainServiceClient {
 
 func (c *domainServiceClient) GetDomainRecord(ctx context.Context, in *DRRequest, opts ...grpc.CallOption) (*DRResponse, error) {
 	out := new(DRResponse)
-	err := c.cc.Invoke(ctx, "/domain_record.v1.DomainService/GetDomainRecord", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/server.service.v1.DomainService/GetDomainRecord", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *domainServiceClient) GetDomainRecord(ctx context.Context, in *DRRequest
 
 func (c *domainServiceClient) UpdateDomainRecord(ctx context.Context, in *UpdateDomainRequest, opts ...grpc.CallOption) (*UpdateDomainResponse, error) {
 	out := new(UpdateDomainResponse)
-	err := c.cc.Invoke(ctx, "/domain_record.v1.DomainService/UpdateDomainRecord", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/server.service.v1.DomainService/UpdateDomainRecord", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func _DomainService_GetDomainRecord_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/domain_record.v1.DomainService/GetDomainRecord",
+		FullMethod: "/server.service.v1.DomainService/GetDomainRecord",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DomainServiceServer).GetDomainRecord(ctx, req.(*DRRequest))
@@ -112,7 +112,7 @@ func _DomainService_UpdateDomainRecord_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/domain_record.v1.DomainService/UpdateDomainRecord",
+		FullMethod: "/server.service.v1.DomainService/UpdateDomainRecord",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DomainServiceServer).UpdateDomainRecord(ctx, req.(*UpdateDomainRequest))
@@ -124,7 +124,7 @@ func _DomainService_UpdateDomainRecord_Handler(srv interface{}, ctx context.Cont
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DomainService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "domain_record.v1.DomainService",
+	ServiceName: "server.service.v1.DomainService",
 	HandlerType: (*DomainServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
