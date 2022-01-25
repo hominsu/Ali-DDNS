@@ -41,12 +41,6 @@ type envDef struct {
 	redisPort                 string
 	redisPassword             string
 	redisDb                   string
-	sessionSize               string
-	sessionNetwork            string
-	sessionAddress            string
-	sessionPort               string
-	sessionPassword           string
-	sessionSecret             string
 	optionTtl                 string
 	optionDelayCheckCron      string
 }

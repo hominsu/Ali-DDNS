@@ -38,9 +38,9 @@ services:
     # DockerHub: hominsu/ali-ddns-server-service:latest
     image: hominsu/ali-ddns-server-service:latest
     container_name: ali-ddns-server-service
-#    build:
-#      context: .
-#      dockerfile: ./Dockerfile
+    #    build:
+    #      context: .
+    #      dockerfile: ./Dockerfile
     depends_on:
       - redis-session
       - redis-ddns
@@ -56,9 +56,11 @@ services:
       ALIDDNSSERVER_ACCESSKEY_SECRET: "*"  # 阿里云 AK SECRET
 
       ALIDDNSSERVER_BASIC_ENDPOINT: "alidns.cn-shenzhen.aliyuncs.com"   # 阿里云服务地址
-      ALIDDNSSERVER_BASIC_WEB_PORT: "50001"                             # WEB 服务监听端口
-      ALIDDNSSERVER_BASIC_RPC_NETWORK: "tcp"                            # RPC 协议
-      ALIDDNSSERVER_BASIC_RPC_PORT: "50002"                             # RPC 服务端口
+      ALIDDNSSERVER_BASIC_INTERFACE_PORT: "50001"                             # WEB 服务监听端口
+      ALIDDNSSERVER_BASIC_DOMAIN_GRPC_NETWORK: "tcp"                    # RPC 协议
+      ALIDDNSSERVER_BASIC_DOMAIN_GRPC_PORT: "50002"                     # RPC 服务端口
+      ALIDDNSSERVER_BASIC_INTERFACE_GRPC_NETWORK: "tcp"                 # RPC 协议
+      ALIDDNSSERVER_BASIC_INTERFACE_GRPC_PORT: "50003"                  # RPC 服务端口
 
       # 保存域名相关信息的 Redis，要改的只有密码，和上面设置的密码相同
       ALIDDNSSERVER_DOMAIN_RECORD_REDIS_ADDR: "redis-ddns"              # 保存域名信息的 Redis 地址
@@ -66,13 +68,7 @@ services:
       ALIDDNSSERVER_DOMAIN_RECORD_REDIS_PASSWORD: "redis-ddns-password" # 保存域名信息的 Redis 密码
       ALIDDNSSERVER_DOMAIN_RECORD_REDIS_DB: "1"                         # 保存域名信息的 Redis 数据库
 
-      # 保存 session 的 Redis，要改的有 Redis 的密码，以及 session 的密码
-      ALIDDNSSERVER_SESSION_SIZE: "10"                                              # session
-      ALIDDNSSERVER_SESSION_REDIS_NETWORK: "tcp"                                    # session 协议
-      ALIDDNSSERVER_SESSION_REDIS_ADDRESS: "redis-session"                          # 保存 session 信息的 Redis 地址
-      ALIDDNSSERVER_SESSION_REDIS_PORT: "6381"                                      # 保存 session 信息的 Redis 端口
-      ALIDDNSSERVER_SESSION_REDIS_PASSWORD: "redis-session-password"                # 保存 session 信息的 Redis 密码
-      ALIDDNSSERVER_SESSION_SECRET: "secret"                                        # session 密码
+      ALIDDNSCLIENT_OPTION_JWT_TOKEN: "www.hauhau.cn"
       ALIDDNSCLIENT_OPTION_TTL: "3600"                                              # 每隔多少秒向服务端获取更新信息
       ALIDDNSCLIENT_OPTION_DELAY_CHECK_CRON: "CRON_TZ=Asia/Shanghai 1/10 2-4 * * *" # 每天的 2-4 点的 1m 开始，每 10m 执行一次
 
