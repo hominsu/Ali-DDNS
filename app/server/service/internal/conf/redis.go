@@ -7,14 +7,14 @@ type RedisConf struct {
 	db       int
 }
 
-func (r RedisConf) Addr() string {
+func (r *RedisConf) Addr() string {
 	return r.addr + ":" + r.port
 }
 
-func (r RedisConf) Password() string {
+func (r *RedisConf) Password() string {
 	return r.password
 }
 
-func (r RedisConf) DB() int {
+func (r *RedisConf) DB() int {
 	return r.db
 }
