@@ -11,6 +11,7 @@ type DomainUser struct {
 
 type DomainUserRepo interface {
 	AddUser(ctx context.Context, du *DomainUser) (bool, error)
+	DelUser(ctx context.Context, du *DomainUser) (int64, error)
 	IsUserExists(ctx context.Context, du *DomainUser) (bool, error)
 	GetUserPassword(ctx context.Context, du *DomainUser) (string, error)
 
@@ -35,6 +36,10 @@ func NewDomainUserUsecase(repo DomainUserRepo) *DomainUserUsecase {
 
 func (uc *DomainUserUsecase) AddUser(ctx context.Context, du *DomainUser) (bool, error) {
 	return uc.repo.AddUser(ctx, du)
+}
+
+func (uc *DomainUserUsecase) DelUser(ctx context.Context, du *DomainUser) (int64, error) {
+	return uc.repo.DelUser(ctx, du)
 }
 
 func (uc *DomainUserUsecase) IsUserExists(ctx context.Context, du *DomainUser) (bool, error) {

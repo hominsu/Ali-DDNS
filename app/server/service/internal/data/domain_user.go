@@ -23,6 +23,13 @@ func (r *domainUserRepo) AddUser(ctx context.Context, du *biz.DomainUser) (bool,
 	return r.data.db.HSet("users", du.Username, du.Password).Result()
 }
 
+func (r *domainUserRepo) DelUser(ctx context.Context, du *biz.DomainUser) (int64, error) {
+	if du.Username == "" {
+		return 0, terrors.New("username should not be empty")
+	}
+	return r.data.db.HDel("users", du.Username).Result()
+}
+
 func (r *domainUserRepo) IsUserExists(ctx context.Context, du *biz.DomainUser) (bool, error) {
 	if du.Username == "" {
 		return false, terrors.New("username should not be empty")
