@@ -3,6 +3,7 @@ package service
 import (
 	v1 "Ali-DDNS/api/server/service/v1"
 	"Ali-DDNS/app/server/service/internal/biz"
+	"Ali-DDNS/app/server/service/jwt"
 	"Ali-DDNS/pkg"
 	"context"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -56,7 +57,7 @@ func (s *DDNSInterfaceService) Cancel(ctx context.Context, in *v1.CancelReq) (*v
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func (s *DDNSInterfaceService) Login(ctx context.Context, in *v1.LoginReq) (*v1.
 		return nil, status.Errorf(codes.PermissionDenied, "Authorized failed")
 	}
 
-	token, err := pkg.GenToken(username)
+	token, err := jwt.GenToken(username)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal Server Error")
 	}
@@ -133,7 +134,7 @@ func (s *DDNSInterfaceService) ListDomainName(ctx context.Context, in *v1.ListDo
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +166,7 @@ func (s *DDNSInterfaceService) CreateDomainName(ctx context.Context, in *v1.Crea
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +197,7 @@ func (s *DDNSInterfaceService) DeleteDomainName(ctx context.Context, in *v1.Dele
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +227,7 @@ func (s *DDNSInterfaceService) ListDevice(ctx context.Context, in *v1.ListDevice
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +261,7 @@ func (s *DDNSInterfaceService) CreateDevice(ctx context.Context, in *v1.CreateDe
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +298,7 @@ func (s *DDNSInterfaceService) DeleteDevice(ctx context.Context, in *v1.DeleteDe
 	}
 
 	// check the username
-	claimsUsername, err := pkg.CheckAuth(ctx)
+	claimsUsername, err := jwt.CheckAuth(ctx)
 	if err != nil {
 		return nil, err
 	}

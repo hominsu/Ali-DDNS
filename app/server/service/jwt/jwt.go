@@ -1,7 +1,7 @@
-package pkg
+package jwt
 
 import (
-	"Ali-DDNS/pkg/conf"
+	"Ali-DDNS/app/server/service/jwt/conf"
 	"context"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
