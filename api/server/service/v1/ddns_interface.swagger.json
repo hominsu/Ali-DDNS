@@ -16,36 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/v1/cancel/{username}": {
-      "delete": {
-        "operationId": "DDNSInterface_Cancel",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1CancelReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "username",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "DDNSInterface"
-        ]
-      }
-    },
     "/v1/login": {
       "post": {
         "operationId": "DDNSInterface_Login",
@@ -103,6 +73,36 @@
             "schema": {
               "$ref": "#/definitions/v1User"
             }
+          }
+        ],
+        "tags": [
+          "DDNSInterface"
+        ]
+      }
+    },
+    "/v1/{username}/cancel": {
+      "delete": {
+        "operationId": "DDNSInterface_Cancel",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CancelReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -448,6 +448,9 @@
       "type": "object",
       "properties": {
         "token": {
+          "type": "string"
+        },
+        "username": {
           "type": "string"
         }
       }

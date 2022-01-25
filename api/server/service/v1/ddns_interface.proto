@@ -33,6 +33,7 @@ message LoginReq {
 
 message LoginReply {
   string token = 1;
+  string username = 2;
 }
 
 message LogoutReq {
@@ -108,7 +109,7 @@ service DDNSInterface {
 
   rpc Cancel(CancelReq) returns (CancelReply) {
     option (google.api.http) = {
-      delete: "/v1/cancel/{username}"
+      delete: "/v1/{username}/cancel"
     };
   };
 

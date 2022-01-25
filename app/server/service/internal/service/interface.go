@@ -5,73 +5,23 @@ import (
 	"Ali-DDNS/app/server/service/internal/biz"
 	"Ali-DDNS/pkg"
 	"context"
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
-	"log"
 	"strings"
 )
 
 var (
-	ignoreMethods = []string{"/v1/register", "/v1/login"}
+	register = "/server.service.v1.DDNSInterface/Register"
+	login    = "/server.service.v1.DDNSInterface/Login"
+
+	ignoreMethods = []string{register, login}
 )
 
 func (s *DDNSInterfaceService) RecoveryInterceptor() grpc_recovery.Option {
 	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
 		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
 	})
-}
-
-// AuthFuncOverride implements grpc_auth.ServiceAuthFuncOverride by
-// iterating through a list of handlers to implement whitelist auth.
-// It takes precedence over the AuthInterceptor method, and will be
-// called instead of AuthInterceptor for all method invocations within that service.
-func (s *DDNSInterfaceService) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
-	var network string
-	var addr string
-	var authType string
-
-	pr, ok := peer.FromContext(ctx)
-	if ok {
-		network = pr.Addr.Network()
-		addr = pr.Addr.String()
-		authType = pr.AuthInfo.AuthType()
-	}
-
-	log.Printf("client: [%s:%s], auth_type: [%s], call: [%s]\n", network, addr, authType, fullMethodName)
-
-	for _, ignoreMethod := range ignoreMethods {
-		if ignoreMethod == fullMethodName {
-			return ctx, nil
-		}
-	}
-	return s.AuthInterceptor(ctx)
-}
-
-// AuthInterceptor .
-func (s *DDNSInterfaceService) AuthInterceptor(ctx context.Context) (context.Context, error) {
-	authString, err := grpc_auth.AuthFromMD(ctx, "bearer")
-	kv := strings.Split(authString, " ")
-	if len(kv) != 2 || kv[0] != "bearer" {
-		return nil, status.Errorf(codes.InvalidArgument, "token invalid")
-	}
-
-	tokenString := kv[1]
-
-	token, claims, err := pkg.ParseToken(tokenString)
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, " %v", err)
-	}
-
-	if !token.Valid {
-		return nil, status.Errorf(codes.Unauthenticated, "Unauthorized")
-	}
-
-	newCtx := context.WithValue(ctx, "username", claims.Username)
-
-	return newCtx, nil
 }
 
 func (s *DDNSInterfaceService) Register(ctx context.Context, in *v1.RegisterReq) (*v1.RegisterReply, error) {
@@ -113,7 +63,10 @@ func (s *DDNSInterfaceService) Cancel(ctx context.Context, in *v1.CancelReq) (*v
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}
@@ -170,7 +123,8 @@ func (s *DDNSInterfaceService) Login(ctx context.Context, in *v1.LoginReq) (*v1.
 	}
 
 	return &v1.LoginReply{
-		Token: "bearer " + token,
+		Token:    "bearer " + token,
+		Username: username,
 	}, nil
 }
 
@@ -186,7 +140,10 @@ func (s *DDNSInterfaceService) ListDomainName(ctx context.Context, in *v1.ListDo
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}
@@ -215,7 +172,10 @@ func (s *DDNSInterfaceService) CreateDomainName(ctx context.Context, in *v1.Crea
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}
@@ -243,7 +203,10 @@ func (s *DDNSInterfaceService) DeleteDomainName(ctx context.Context, in *v1.Dele
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}
@@ -270,7 +233,10 @@ func (s *DDNSInterfaceService) ListDevice(ctx context.Context, in *v1.ListDevice
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}
@@ -301,7 +267,10 @@ func (s *DDNSInterfaceService) CreateDevice(ctx context.Context, in *v1.CreateDe
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}
@@ -335,7 +304,10 @@ func (s *DDNSInterfaceService) DeleteDevice(ctx context.Context, in *v1.DeleteDe
 	}
 
 	// check the username
-	claimsUsername := ctx.Value("username").(string)
+	claimsUsername, err := pkg.CheckAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claimsUsername != username {
 		return nil, status.Errorf(codes.Unauthenticated, "username not equal token's username")
 	}

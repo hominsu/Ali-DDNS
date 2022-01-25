@@ -2,7 +2,12 @@ package pkg
 
 import (
 	"Ali-DDNS/pkg/conf"
+	"context"
 	"github.com/golang-jwt/jwt/v4"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"strings"
 	"time"
 )
 
@@ -50,4 +55,25 @@ func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	}
 
 	return token, claims, nil
+}
+
+func CheckAuth(ctx context.Context) (string, error) {
+	authString, err := grpc_auth.AuthFromMD(ctx, "bearer")
+	kv := strings.Split(authString, " ")
+	if len(kv) != 2 || kv[0] != "bearer" {
+		return "", status.Errorf(codes.InvalidArgument, "token invalid")
+	}
+
+	tokenString := kv[1]
+
+	token, claims, err := ParseToken(tokenString)
+	if err != nil {
+		return "", status.Errorf(codes.Unauthenticated, " %v", err)
+	}
+
+	if !token.Valid {
+		return "", status.Errorf(codes.Unauthenticated, "Unauthorized")
+	}
+
+	return claims.Username, nil
 }

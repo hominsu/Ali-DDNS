@@ -606,7 +606,7 @@ func RegisterDDNSInterfaceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/server.service.v1.DDNSInterface/Cancel", runtime.WithHTTPPathPattern("/v1/cancel/{username}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/server.service.v1.DDNSInterface/Cancel", runtime.WithHTTPPathPattern("/v1/{username}/cancel"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -872,7 +872,7 @@ func RegisterDDNSInterfaceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/server.service.v1.DDNSInterface/Cancel", runtime.WithHTTPPathPattern("/v1/cancel/{username}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/server.service.v1.DDNSInterface/Cancel", runtime.WithHTTPPathPattern("/v1/{username}/cancel"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1054,7 +1054,7 @@ func RegisterDDNSInterfaceHandlerClient(ctx context.Context, mux *runtime.ServeM
 var (
 	pattern_DDNSInterface_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "register"}, ""))
 
-	pattern_DDNSInterface_Cancel_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cancel", "username"}, ""))
+	pattern_DDNSInterface_Cancel_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"v1", "username", "cancel"}, ""))
 
 	pattern_DDNSInterface_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "login"}, ""))
 

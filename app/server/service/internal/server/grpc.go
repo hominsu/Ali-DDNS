@@ -5,7 +5,6 @@ import (
 	"Ali-DDNS/app/server/service/internal/service"
 	"Ali-DDNS/pkg"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
 )
@@ -25,6 +24,14 @@ func NewDomainGRPCServer(service *service.DomainTaskService) (*DomainServer, err
 	}
 
 	opts = append(opts, grpc.Creds(creds))
+
+	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+		grpc_recovery.StreamServerInterceptor(service.RecoveryInterceptor()),
+	)))
+
+	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		grpc_recovery.UnaryServerInterceptor(service.RecoveryInterceptor()),
+	)))
 
 	srv := grpc.NewServer(opts...)
 
@@ -46,15 +53,15 @@ func NewInterfaceGRPCServer(service *service.DDNSInterfaceService) (*InterfaceSe
 		return nil, err
 	}
 
-	opts = append(opts, grpc.Creds(creds),
-		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-			grpc_auth.StreamServerInterceptor(service.AuthInterceptor),
-			grpc_recovery.StreamServerInterceptor(service.RecoveryInterceptor()),
-		)),
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			grpc_auth.UnaryServerInterceptor(service.AuthInterceptor),
-			grpc_recovery.UnaryServerInterceptor(service.RecoveryInterceptor()),
-		)))
+	opts = append(opts, grpc.Creds(creds))
+
+	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+		grpc_recovery.StreamServerInterceptor(service.RecoveryInterceptor()),
+	)))
+
+	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		grpc_recovery.UnaryServerInterceptor(service.RecoveryInterceptor()),
+	)))
 
 	srv := grpc.NewServer(opts...)
 
