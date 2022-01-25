@@ -1,11 +1,12 @@
 package pkg
 
 import (
+	"Ali-DDNS/pkg/conf"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
 
-var jwtKey = []byte("ddns.haomingsu.cn")
+var jwtKey = []byte(conf.Option().JwtToken())
 
 type Claims struct {
 	Username string
@@ -42,7 +43,7 @@ func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(*jwt.Token) (interface{}, error) {
-		return []byte("ddns.haomingsu.cn"), nil
+		return jwtKey, nil
 	})
 	if err != nil {
 		return nil, nil, err
