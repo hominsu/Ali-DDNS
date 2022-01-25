@@ -4,11 +4,14 @@ import (
 	"Ali-DDNS/pkg/conf"
 	"context"
 	"github.com/golang-jwt/jwt/v4"
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"strings"
 	"time"
+)
+
+var (
+	headerAuthorize = "authorization"
 )
 
 var jwtKey = []byte(conf.Option().JwtToken())
@@ -58,13 +61,11 @@ func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 }
 
 func CheckAuth(ctx context.Context) (string, error) {
-	authString, err := grpc_auth.AuthFromMD(ctx, "bearer")
-	kv := strings.Split(authString, " ")
-	if len(kv) != 2 || kv[0] != "bearer" {
+	tokenString := metautils.ExtractIncoming(ctx).Get(headerAuthorize)
+
+	if tokenString == "" {
 		return "", status.Errorf(codes.InvalidArgument, "token invalid")
 	}
-
-	tokenString := kv[1]
 
 	token, claims, err := ParseToken(tokenString)
 	if err != nil {

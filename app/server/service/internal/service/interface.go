@@ -11,13 +11,6 @@ import (
 	"strings"
 )
 
-var (
-	register = "/server.service.v1.DDNSInterface/Register"
-	login    = "/server.service.v1.DDNSInterface/Login"
-
-	ignoreMethods = []string{register, login}
-)
-
 func (s *DDNSInterfaceService) RecoveryInterceptor() grpc_recovery.Option {
 	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
 		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
@@ -123,7 +116,7 @@ func (s *DDNSInterfaceService) Login(ctx context.Context, in *v1.LoginReq) (*v1.
 	}
 
 	return &v1.LoginReply{
-		Token:    "bearer " + token,
+		Token:    token,
 		Username: username,
 	}, nil
 }
