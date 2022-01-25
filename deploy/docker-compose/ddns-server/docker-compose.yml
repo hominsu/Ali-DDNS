@@ -16,21 +16,6 @@ services:
         aliases:
           - redis-ddns
 
-  # 用来保存 session 信息的 Redis
-  redis-session:
-    image: redis:alpine
-    container_name: ali-ddns-redis-session
-    # 设置 Redis 的密码，下面记得主服务中填写对应的密码
-    command: redis-server --port 6381 --requirepass redis-session-password
-    volumes:
-      - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./redis/session/data:/data
-      - ./redis/session/logs:/logs
-    networks:
-      net:
-        aliases:
-          - redis-session
-
   # 主服务
   ali-ddns-server-service:
     # 阿里云仓库:  registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-server-service:latest
@@ -66,7 +51,7 @@ services:
       ALIDDNSSERVER_DOMAIN_RECORD_REDIS_PASSWORD: "redis-ddns-password" # 保存域名信息的 Redis 密码
       ALIDDNSSERVER_DOMAIN_RECORD_REDIS_DB: "1"                         # 保存域名信息的 Redis 数据库
 
-      ALIDDNSCLIENT_OPTION_JWT_TOKEN: "www.hauhau.cn"
+      ALIDDNSCLIENT_OPTION_JWT_TOKEN: "www.hauhau.cn"                               # jwt token
       ALIDDNSCLIENT_OPTION_TTL: "3600"                                              # 每隔多少秒向服务端获取更新信息
       ALIDDNSCLIENT_OPTION_DELAY_CHECK_CRON: "CRON_TZ=Asia/Shanghai 1/10 2-4 * * *" # 每天的 2-4 点的 1m 开始，每 10m 执行一次
 
