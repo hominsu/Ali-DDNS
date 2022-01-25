@@ -1,13 +1,25 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "v1/ddns_interface.proto",
-    "version": "version not set"
+    "title": "DDNS Interface API",
+    "version": "1.0",
+    "contact": {
+      "name": "Ali-DDNS",
+      "url": "https://github.com/hominsu/Ali-DDNS",
+      "email": "1774069959@qq.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/hominsu/Ali-DDNS/blob/main/LICENSE"
+    }
   },
   "tags": [
     {
       "name": "DDNSInterface"
     }
+  ],
+  "schemes": [
+    "https"
   ],
   "consumes": [
     "application/json"
