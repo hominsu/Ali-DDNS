@@ -16,21 +16,6 @@ services:
         aliases:
           - redis-ddns
 
-  # 用来保存 session 信息的 Redis
-  redis-session:
-    image: redis:alpine
-    container_name: ali-ddns-redis-session
-    # 设置 Redis 的密码，下面记得主服务中填写对应的密码
-    command: redis-server --port 6381 --requirepass redis-session-password
-    volumes:
-      - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./redis/session/data:/data
-      - ./redis/session/logs:/logs
-    networks:
-      net:
-        aliases:
-          - redis-session
-
   # 主服务
   ali-ddns-server-service:
     # 阿里云仓库:  registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-server-service:latest
