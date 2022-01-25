@@ -12,22 +12,16 @@ var (
 	basic = &BasicConf{}
 
 	env = &envDef{
-		akId:            "ALIDDNSSERVER_ACCESSKEY_ID",
-		akSecret:        "ALIDDNSSERVER_ACCESSKEY_SECRET",
-		basicEndpoint:   "ALIDDNSSERVER_BASIC_ENDPOINT",
-		basicWebPort:    "ALIDDNSSERVER_BASIC_WEB_PORT",
-		basicRpcNetwork: "ALIDDNSSERVER_BASIC_RPC_NETWORK",
-		basicRpcPort:    "ALIDDNSSERVER_BASIC_RPC_PORT",
+		akId:          "ALIDDNSSERVER_ACCESSKEY_ID",
+		akSecret:      "ALIDDNSSERVER_ACCESSKEY_SECRET",
+		basicEndpoint: "ALIDDNSSERVER_BASIC_ENDPOINT",
 	}
 )
 
 type envDef struct {
-	akId            string
-	akSecret        string
-	basicEndpoint   string
-	basicWebPort    string
-	basicRpcNetwork string
-	basicRpcPort    string
+	akId          string
+	akSecret      string
+	basicEndpoint string
 }
 
 func AK() *AccessKeyConf {
@@ -59,12 +53,6 @@ func setEnv(key, value string) {
 		AK().secret = value
 	case "basicEndpoint":
 		Basic().endpoint = value
-	case "basicWebPort":
-		Basic().webPort = value
-	case "basicRpcNetwork":
-		Basic().rpcNetwork = value
-	case "basicRpcPort":
-		Basic().rpcPort = value
 	default:
 		envError("Unknown Env Name")
 	}

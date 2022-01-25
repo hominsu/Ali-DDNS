@@ -7,7 +7,7 @@ import (
 )
 
 // ProviderSet is domain task service providers.
-var ProviderSet = wire.NewSet(NewDomainTaskService)
+var ProviderSet = wire.NewSet(NewDomainTaskService, NewDDNSInterfaceService)
 
 type DomainTaskService struct {
 	v1.UnimplementedDomainServiceServer
@@ -24,5 +24,17 @@ func NewDomainTaskService(delayCheckUsecase *biz.DelayCheckUsecase,
 		delayCheckUsecase:   delayCheckUsecase,
 		domainRecordUsecase: domainRecordUsecase,
 		domainUserUsecase:   domainUserUsecase,
+	}
+}
+
+type DDNSInterfaceService struct {
+	v1.UnimplementedDDNSInterfaceServer
+
+	domainUserUsecase *biz.DomainUserUsecase
+}
+
+func NewDDNSInterfaceService(domainUserUsecase *biz.DomainUserUsecase) *DDNSInterfaceService {
+	return &DDNSInterfaceService{
+		domainUserUsecase: domainUserUsecase,
 	}
 }

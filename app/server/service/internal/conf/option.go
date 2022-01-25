@@ -5,10 +5,10 @@ type OptionConf struct {
 	delayCheckCron string
 }
 
-func (o OptionConf) TTL() string {
+func (o *OptionConf) TTL() string {
 	return o.ttl
 }
 
-func (o OptionConf) DelayCheckCron() string {
+func (o *OptionConf) DelayCheckCron() string {
 	return o.delayCheckCron
 }

@@ -7,8 +7,17 @@ import (
 	"Ali-DDNS/internal/openapi/defs/DescribeDomainRecords"
 	"context"
 	"encoding/json"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 )
+
+func (s *DomainTaskService) RecoveryInterceptor() grpc_recovery.Option {
+	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
+		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
+	})
+}
 
 // GetDomainRecord get the domain record from data repo
 func (s *DomainTaskService) GetDomainRecord(ctx context.Context, in *v1.DRRequest) (*v1.DRResponse, error) {

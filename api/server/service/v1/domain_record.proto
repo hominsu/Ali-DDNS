@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package domain_record.v1;
+package server.service.v1;
 
-option go_package = "Ali-DDNS/api/domain_record/v1;v1";
+option go_package = "api/server/service/v1;v1";
 
 message DRRequest {
   string domain_name = 1;

@@ -2,8 +2,8 @@ package main
 
 import (
 	"Ali-DDNS/app/server/service/internal/conf"
+	"Ali-DDNS/app/server/service/internal/server"
 	"context"
-	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 	"google.golang.org/grpc"
 	"log"
@@ -29,15 +29,22 @@ var (
 	id, _ = os.Hostname()
 )
 
-type grpcService struct {
+type domainGrpcService struct {
 	gs    *grpc.Server
 	lis   *net.Listener
 	serve func(stop chan struct{}, gs *grpc.Server, lis *net.Listener) error
 }
 
-type ginService struct {
+type interfaceGrpcService struct {
+	gs    *grpc.Server
+	lis   *net.Listener
+	serve func(stop chan struct{}, gs *grpc.Server, lis *net.Listener) error
+}
+
+type interfaceHttpService struct {
 	hs    *http.Server
-	serve func(stop chan struct{}, hs *http.Server) error
+	rc    context.CancelFunc
+	serve func(stop chan struct{}, hs *http.Server, rc context.CancelFunc) error
 }
 
 type cronService struct {
@@ -47,19 +54,20 @@ type cronService struct {
 
 // App contain grpc serve and gin http serve
 type App struct {
-	grpcService *grpcService
-	ginService  *ginService
-	cronService *cronService
+	domainGrpcService    *domainGrpcService
+	interfaceGrpcService *interfaceGrpcService
+	interfaceHttpService *interfaceHttpService
+	cronService          *cronService
 }
 
-func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine, cronConf *cron.Cron) *App {
-	grpcListener, err := net.Listen(conf.Basic().RpcNetwork(), ":"+conf.Basic().RpcPort())
+func newApp(ds *server.DomainServer, is *server.InterfaceServer, hs *server.HttpServer, cr *cron.Cron) *App {
+	dsListener, err := net.Listen(conf.Basic().DomainGrpcNetwork(), ":"+conf.Basic().DomainGrpcPort())
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// grpc serve func, use stop channel to smooth exit
-	grpcServe := func(stop chan struct{}, gs *grpc.Server, lis *net.Listener) error {
+	dsServe := func(stop chan struct{}, gs *grpc.Server, lis *net.Listener) error {
 		go func(stop chan struct{}) {
 			<-stop
 			gs.Stop()
@@ -68,14 +76,30 @@ func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine, cronConf *cron.Cron)
 		return gs.Serve(*lis)
 	}
 
-	ginServer := http.Server{
-		Addr:    ":" + conf.Basic().WebPort(),
-		Handler: ginEngine,
+	isListener, err := net.Listen(conf.Basic().InterfaceGrpcNetwork(), ":"+conf.Basic().InterfaceGrpcPort())
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// gin serve func, use stop channel to smooth exit
-	ginServe := func(stop chan struct{}, hs *http.Server) error {
-		go func(stop chan struct{}, hs *http.Server) {
+	// grpc serve func, use stop channel to smooth exit
+	isServe := func(stop chan struct{}, gs *grpc.Server, lis *net.Listener) error {
+		go func(stop chan struct{}) {
+			<-stop
+			gs.Stop()
+		}(stop)
+
+		return gs.Serve(*lis)
+	}
+
+	httpServer := &http.Server{
+		Addr:    ":" + conf.Basic().InterfacePort(),
+		Handler: hs.Mux,
+	}
+
+	// http serve func, use stop channel to smooth exit
+	httpServe := func(stop chan struct{}, hs *http.Server, rc context.CancelFunc) error {
+		go func(stop chan struct{}, hs *http.Server, rc context.CancelFunc) {
+			defer rc()
 			<-stop
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
@@ -83,7 +107,7 @@ func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine, cronConf *cron.Cron)
 			if err := hs.Shutdown(ctx); err != nil {
 				log.Println(err)
 			}
-		}(stop, hs)
+		}(stop, hs, rc)
 
 		return hs.ListenAndServe()
 	}
@@ -99,17 +123,23 @@ func newApp(grpcServer *grpc.Server, ginEngine *gin.Engine, cronConf *cron.Cron)
 	}
 
 	return &App{
-		grpcService: &grpcService{
-			gs:    grpcServer,
-			lis:   &grpcListener,
-			serve: grpcServe,
+		domainGrpcService: &domainGrpcService{
+			gs:    ds.Server,
+			lis:   &dsListener,
+			serve: dsServe,
 		},
-		ginService: &ginService{
-			hs:    &ginServer,
-			serve: ginServe,
+		interfaceGrpcService: &interfaceGrpcService{
+			gs:    is.Server,
+			lis:   &isListener,
+			serve: isServe,
+		},
+		interfaceHttpService: &interfaceHttpService{
+			hs:    httpServer,
+			rc:    hs.GRPCCancel,
+			serve: httpServe,
 		},
 		cronService: &cronService{
-			cr:    cronConf,
+			cr:    cr,
 			serve: cronServe,
 		},
 	}
@@ -122,16 +152,22 @@ func (a *App) start(stop chan struct{}, errors chan error) {
 		log.Println("cron service stop...")
 	}()
 
-	// grpc server
+	// domain grpc server
 	go func() {
-		errors <- a.grpcService.serve(stop, a.grpcService.gs, a.grpcService.lis)
-		log.Println("grpc service stop...")
+		errors <- a.domainGrpcService.serve(stop, a.domainGrpcService.gs, a.domainGrpcService.lis)
+		log.Println("domain grpc service stop...")
 	}()
 
-	// web server
+	// interface grpc server
 	go func() {
-		errors <- a.ginService.serve(stop, a.ginService.hs)
-		log.Println("http service stop...")
+		errors <- a.interfaceGrpcService.serve(stop, a.interfaceGrpcService.gs, a.interfaceGrpcService.lis)
+		log.Println("interface grpc service stop...")
+	}()
+
+	// interface http server
+	go func() {
+		errors <- a.interfaceHttpService.serve(stop, a.interfaceHttpService.hs, a.interfaceHttpService.rc)
+		log.Println("interface http service stop...")
 	}()
 }
 
@@ -157,7 +193,7 @@ func main() {
 
 	// stop channel use to control all server's status, error channel use to receive the server error
 	stop := make(chan struct{})
-	errors := make(chan error, 3)
+	errors := make(chan error, 4)
 
 	app, dataRepoCleanup, err := initApp()
 	if err != nil {
