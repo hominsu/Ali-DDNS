@@ -29,18 +29,28 @@ func initApp() (*App, func(), error) {
 	domainUserRepo := data.NewDomainUserRepo(dataData)
 	domainUserUsecase := biz.NewDomainUserUsecase(domainUserRepo)
 	domainTaskService := service.NewDomainTaskService(delayCheckUsecase, domainRecordUsecase, domainUserUsecase)
-	grpcServer, err := server.NewGRPCServer(domainTaskService)
+	domainServer, err := server.NewDomainGRPCServer(domainTaskService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	engine := server.NewGinServer(domainTaskService)
+	ddnsInterfaceService := service.NewDDNSInterfaceService(domainUserUsecase)
+	interfaceServer, err := server.NewInterfaceGRPCServer(ddnsInterfaceService)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	httpServer, err := server.NewInterfaceHTTPServer()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	cron, err := server.NewCronServer(domainTaskService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	app := newApp(grpcServer, engine, cron)
+	app := newApp(domainServer, interfaceServer, httpServer, cron)
 	return app, func() {
 		cleanup()
 	}, nil

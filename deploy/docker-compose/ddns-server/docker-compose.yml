@@ -49,8 +49,6 @@ services:
       # 设置时区，不然 logs 的时间不对
       TZ: "Asia/Shanghai" # 时区
 
-      GIN_MODE: "release"
-
       # 设置阿里云的 AK，建议使用 RAM 用户，只分配 AliyunDNSFullAccess 权限
       ALIDDNSSERVER_ACCESSKEY_ID: "*"            # 阿里云 AK ID
       ALIDDNSSERVER_ACCESSKEY_SECRET: "*"  # 阿里云 AK SECRET
