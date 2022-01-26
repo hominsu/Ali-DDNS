@@ -1,6 +1,9 @@
 package biz
 
-import "context"
+import (
+	"context"
+	"go.uber.org/zap"
+)
 
 type DomainRecord struct {
 	DomainName string
@@ -17,11 +20,15 @@ type DomainRecordRepo interface {
 }
 
 type DomainRecordUsecase struct {
-	repo DomainRecordRepo
+	repo   DomainRecordRepo
+	logger *zap.SugaredLogger
 }
 
-func NewDomainRecordUsecase(repo DomainRecordRepo) *DomainRecordUsecase {
-	return &DomainRecordUsecase{repo: repo}
+func NewDomainRecordUsecase(repo DomainRecordRepo, logger *zap.Logger) *DomainRecordUsecase {
+	return &DomainRecordUsecase{
+		repo:   repo,
+		logger: logger.Sugar(),
+	}
 }
 
 func (uc *DomainRecordUsecase) SetDomainRecord(ctx context.Context, dr *DomainRecord) (bool, error) {

@@ -4,15 +4,18 @@ import (
 	"Ali-DDNS/app/server/service/internal/biz"
 	"context"
 	terrors "github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type delayCheckRepo struct {
-	data *Data
+	data   *Data
+	logger *zap.SugaredLogger
 }
 
-func NewDelayCheckRepo(data *Data) biz.DelayCheckRepo {
+func NewDelayCheckRepo(data *Data, logger *zap.Logger) biz.DelayCheckRepo {
 	return &delayCheckRepo{
-		data: data,
+		data:   data,
+		logger: logger.Sugar(),
 	}
 }
 

@@ -6,17 +6,10 @@ import (
 	"Ali-DDNS/app/server/service/jwt"
 	"Ali-DDNS/pkg"
 	"context"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"strings"
 )
-
-func (s *DDNSInterfaceService) RecoveryInterceptor() grpc_recovery.Option {
-	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
-		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
-	})
-}
 
 func (s *DDNSInterfaceService) Register(ctx context.Context, in *v1.RegisterReq) (*v1.RegisterReply, error) {
 	// get the username and password from http request header
@@ -99,7 +92,7 @@ func (s *DDNSInterfaceService) Login(ctx context.Context, in *v1.LoginReq) (*v1.
 		return nil, status.Errorf(codes.Internal, "Internal Server Error")
 	}
 	if !userExists {
-		return nil, status.Errorf(codes.Internal, "Internal Server Error")
+		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 
 	// check if the user and password matches, return if it does not exist

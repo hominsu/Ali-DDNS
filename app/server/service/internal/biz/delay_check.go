@@ -1,6 +1,9 @@
 package biz
 
-import "context"
+import (
+	"context"
+	"go.uber.org/zap"
+)
 
 type DelayCheck struct {
 	DomainName string
@@ -13,11 +16,15 @@ type DelayCheckRepo interface {
 }
 
 type DelayCheckUsecase struct {
-	repo DelayCheckRepo
+	repo   DelayCheckRepo
+	logger *zap.SugaredLogger
 }
 
-func NewDelayCheckUsecase(repo DelayCheckRepo) *DelayCheckUsecase {
-	return &DelayCheckUsecase{repo: repo}
+func NewDelayCheckUsecase(repo DelayCheckRepo, logger *zap.Logger) *DelayCheckUsecase {
+	return &DelayCheckUsecase{
+		repo:   repo,
+		logger: logger.Sugar(),
+	}
 }
 
 func (uc *DelayCheckUsecase) SetDelayTask(ctx context.Context, dc *DelayCheck) (int64, error) {

@@ -6,9 +6,10 @@ import (
 	"context"
 	terrors "github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
+	"go.uber.org/zap"
 )
 
-func NewCronServer(service *service.DomainTaskService) (*cron.Cron, error) {
+func NewCronServer(service *service.DomainTaskService, logger *zap.Logger) (*cron.Cron, error) {
 	// 新建一个定时器
 	cr := cron.New()
 
