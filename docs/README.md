@@ -71,6 +71,203 @@ DDNS service by using Ali openapi
   git clone --depth=1 https://github.com/hominsu/Ali-DDNS.git
   ```
 
+- Using openssl to generate SANs certs
+
+    1. Create CA's certs:
+
+       ```bash
+       ❯ openssl genrsa -out ca.key 4096
+       Generating RSA private key, 4096 bit long modulus (2 primes)
+       ..................................................................++++
+       .........................++++
+       e is 65537 (0x010001)
+       
+       ❯ openssl req -new -x509 -days 3650 -key ca.key -out ca.crt
+       You are about to be asked to enter information that will be incorporated
+       into your certificate request.
+       What you are about to enter is what is called a Distinguished Name or a DN.
+       There are quite a few fields but you can leave some blank
+       For some fields there will be a default value,
+       If you enter '.', the field will be left blank.
+       -----
+       Country Name (2 letter code) [AU]:CN
+       State or Province Name (full name) [Some-State]:Guangdong
+       Locality Name (eg, city) []:Foshan
+       Organization Name (eg, company) [Internet Widgits Pty Ltd]:hominsu
+       Organizational Unit Name (eg, section) []:hominsu
+       Common Name (e.g. server FQDN or YOUR name) []:localhost
+       Email Address []:1774069959@qq.com
+       ```
+
+    2. Prepare the openssl configuration file
+
+       copy the default openssl to current dir
+
+        - `linux`:
+
+          ```bash
+          cp /etc/pki/tls/openssl.cnf .
+
+        - `macos`:
+
+          ```bash
+          cp /System/Library/OpenSSL/openssl.cnf .
+          ```
+
+       Modify the following options in `openssl.cnf`
+
+        - Find `[ CA_default ]` and uncomment `copy_extensions = copy`:
+
+          ```bash
+          [ CA_default ]
+          # Extension copying option: use with caution.
+          copy_extensions = copy
+          ```
+
+        - Find `[ req ]` and uncomment `req_extensions = v3_req`:
+
+          ```bash
+          [ req ]
+          req_extensions = v3_req # The extensions to add to a certificate request
+          ```
+
+        - Find `[ v3_req ]` and add `subjectAltName = @alt_names`, then add the new tag `[ alt_names ]` and the field:
+
+          ```bash
+          [ v3_req ]       
+                           
+          # Extensions to add to a certificate request
+                           
+          basicConstraints = CA:FALSE
+          keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+          subjectAltName = @alt_names
+                           
+          [ alt_names ]    
+          DNS.1 = localhost
+          DNS.2 = *.example.com
+          ```
+
+    3. Generate server-side certs
+
+       ```bash
+       ❯ openssl genpkey -algorithm RSA -out server.key
+       .....................................................................................................+++++
+       ..........+++++
+       
+       ❯ openssl req -new -nodes -key server.key -out server.csr -days 3650 -config ./openssl.cnf -extensions v3_req
+       Ignoring -days; not generating a certificate
+       You are about to be asked to enter information that will be incorporated
+       into your certificate request.
+       What you are about to enter is what is called a Distinguished Name or a DN.
+       There are quite a few fields but you can leave some blank
+       For some fields there will be a default value,
+       If you enter '.', the field will be left blank.
+       -----
+       Country Name (2 letter code) [AU]:CN
+       State or Province Name (full name) [Some-State]:Guangdong
+       Locality Name (eg, city) []:Foshan
+       Organization Name (eg, company) [Internet Widgits Pty Ltd]:hominsu
+       Organizational Unit Name (eg, section) []:hominsu
+       Common Name (e.g. server FQDN or YOUR name) []:localhost
+       Email Address []:1774069959@qq.com
+       
+       Please enter the following 'extra' attributes
+       to be sent with your certificate request
+       A challenge password []:your_password
+       An optional company name []:hominsu
+       
+       ❯ openssl x509 -req -days 3650 -in server.csr -out server.pem -CA ca.crt -CAkey ca.key -CAcreateserial -extfile ./openssl.cnf -extensions v3_req
+       Signature ok
+       subject=C = CN, ST = Guangdong, L = Foshan, O = hominsu, OU = hominsu, CN = localhost, emailAddress = 1774069959@qq.com
+       Getting CA Private Key
+       ```
+
+    4. Generate client-side certs
+
+       ```bash
+       ❯ openssl genpkey -algorithm RSA -out client.key
+       ..................................................................................+++++
+       ..............................................+++++
+       
+       ❯ openssl req -new -nodes -key client.key -out client.csr -days 3650 -config ./openssl.cnf -extensions v3_req
+       Ignoring -days; not generating a certificate
+       You are about to be asked to enter information that will be incorporated
+       into your certificate request.
+       What you are about to enter is what is called a Distinguished Name or a DN.
+       There are quite a few fields but you can leave some blank
+       For some fields there will be a default value,
+       If you enter '.', the field will be left blank.
+       -----
+       Country Name (2 letter code) [AU]:CN
+       State or Province Name (full name) [Some-State]:Guangdong
+       Locality Name (eg, city) []:Foshan
+       Organization Name (eg, company) [Internet Widgits Pty Ltd]:hominsu
+       Organizational Unit Name (eg, section) []:hominsu
+       Common Name (e.g. server FQDN or YOUR name) []:localhost
+       Email Address []:1774069959@qq.com
+       
+       Please enter the following 'extra' attributes
+       to be sent with your certificate request
+       A challenge password []:your_password
+       An optional company name []:hominsu
+       
+       ❯ openssl x509 -req -days 3650 -in client.csr -out client.pem -CA ca.crt -CAkey ca.key -CAcreateserial -extfile ./openssl.cnf -extensions v3_req
+       Signature ok
+       subject=C = CN, ST = Guangdong, L = Foshan, O = hominsu, OU = hominsu, CN = localhost, emailAddress = 1774069959@qq.com
+       Getting CA Private Key
+       ```
+
+  The full file is shown below:
+
+  ```bash
+  ❯ tree
+  .
+  ├── ca.crt
+  ├── ca.key
+  ├── ca.srl
+  ├── client.csr
+  ├── client.key
+  ├── client.pem
+  ├── openssl.cnf
+  ├── server.csr
+  ├── server.key
+  └── server.pem
+  
+  0 directories, 10 files
+  ```
+
+  In the server-side, the `ca.crt`, `server.pem`, `server.key` is using to set credentials for server connections, and the `grpc-gateway` will use the `ca.crt`, `client.pem`, `client.key` to set credentials for connections between `grpc-gateway` and `grpc server`
+
+  In the client-side, for safety reasons, you should generate the certs for each client with the CA's certs (`ca.crt` and `ca.key`) if others use your grpc-services, or you can just use the same certs as gateway (not recommended)
+
+  Then create a cert directory and copy the certs into it
+
+  On the server side, the file structure is shown below:
+
+  ```bash
+  ❯ tree cert
+  cert
+  ├── ca.crt
+  ├── client.key
+  ├── client.pem
+  ├── server.key
+  └── server.pem
+  
+  0 directories, 5 files
+  ```
+
+  On the server side, the file structure is shown below:
+
+  ```bash
+  ❯ tree cert
+  cert
+  ├── ca.crt
+  ├── client.key
+  └── client.pem
+  
+  0 directories, 3 files
+  ```
+
 - In server-service, fill in your  Ali Access-Key in the `docker-compose.yml`, set your redis db password. The interface use jwt for authentication, may sure you set the jwt token (e.g. `www.hauhau.cn`). Usually the operator updates the public IP in the early morning, so use the Cron expression (e.g. `CRON_TZ=Asia/Shanghai 1/10 2-4 * * *`) to specify that it updates at a higher frequency during the early morning hours and at a slower rate (like once per hour) at other times. Of course you can define your own time.
 
   ```yaml
@@ -90,7 +287,6 @@ DDNS service by using Ali openapi
     #   context: .
     #   dockerfile: ./Dockerfile
     depends_on:
-      - redis-session
       - redis-ddns
     restart: always
     environment:
@@ -114,12 +310,12 @@ DDNS service by using Ali openapi
     ALIDDNSSERVER_DOMAIN_RECORD_REDIS_PASSWORD: "redis-ddns-password" # 保存域名信息的 Redis 密码
     ALIDDNSSERVER_DOMAIN_RECORD_REDIS_DB: "1"                         # 保存域名信息的 Redis 数据库
     
-    ALIDDNSCLIENT_OPTION_JWT_TOKEN: "www.hauhau.cn"                   # jwt token
+    ALIDDNSCLIENT_OPTION_JWT_TOKEN: "jwt_token"                       # jwt token
     ALIDDNSCLIENT_OPTION_TTL: "3600"                                  # 每隔多少秒向服务端获取更新信息
     ALIDDNSCLIENT_OPTION_DELAY_CHECK_CRON: "CRON_TZ=Asia/Shanghai 1/10 2-4 * * *" # 每天的 2-4 点的 1m 开始，每 10m 执行一次
   
   ```
-  
+
 - Up the server-service
 
   ```bash
@@ -136,140 +332,140 @@ DDNS service by using Ali openapi
 
 - Configuring the server service
 
-  1. Register a user
+    1. Register a user
 
-     Send an http request via `cURL`:
+       Send an http request via `cURL`:
 
-     ```bash
-     curl --location --request POST 'http://127.0.0.1:50001/v1/register' \ 
-     --header 'Content-Type: application/json' \
-     --data-raw '{
-         "username": "admin",
-         "password": "passwd"
-     }'
-     ```
-
-     Or use `wget`:
-
-     ```bash
-     wget --no-check-certificate --quiet \
-       --method POST \
-       --timeout=0 \
+       ```bash
+       curl --location --request POST 'http://127.0.0.1:50001/v1/register' \ 
        --header 'Content-Type: application/json' \
-       --body-data '{
-         "username": "admin",
-         "password": "passwd"
-     }' \
-        'http://127.0.0.1:50001/v1/register'
-     ```
+       --data-raw '{
+           "username": "admin",
+           "password": "passwd"
+       }'
+       ```
 
-     You will get the following output if the request is successful
+       Or use `wget`:
 
-     ```bash
-     {"status":true}
-     ```
+       ```bash
+       wget --no-check-certificate --quiet \
+         --method POST \
+         --timeout=0 \
+         --header 'Content-Type: application/json' \
+         --body-data '{
+           "username": "admin",
+           "password": "passwd"
+       }' \
+          'http://127.0.0.1:50001/v1/register'
+       ```
 
-  2. Login to get the token
+       You will get the following output if the request is successful
 
-     `cURL`:
+       ```bash
+       {"status":true}
+       ```
 
-     ```bash
-     curl --location --request POST 'http://127.0.0.1:50001/v1/login' \
-     --header 'Content-Type: application/json' \
-     --data-raw '{
-         "username": "admin",
-         "password": "passwd"
-     }'
-     ```
+    2. Login to get the token
 
-     `wget`:
+       `cURL`:
 
-     ```bash
-     wget --no-check-certificate --quiet \
-       --method POST \
-       --timeout=0 \
+       ```bash
+       curl --location --request POST 'http://127.0.0.1:50001/v1/login' \
        --header 'Content-Type: application/json' \
-       --body-data '{
-         "username": "admin",
-         "password": "passwd"
-     }' \
-        'http://127.0.0.1:50001/v1/login'
-     ```
+       --data-raw '{
+           "username": "admin",
+           "password": "passwd"
+       }'
+       ```
 
-     You will get the following output with `token` and `username` if the request is successful 
+       `wget`:
 
-     ```bash
-     {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ", "username":"admin"}
-     ```
+       ```bash
+       wget --no-check-certificate --quiet \
+         --method POST \
+         --timeout=0 \
+         --header 'Content-Type: application/json' \
+         --body-data '{
+           "username": "admin",
+           "password": "passwd"
+       }' \
+          'http://127.0.0.1:50001/v1/login'
+       ```
 
-  3. Add the domain name you need to monitor, note that the `{username}` in the url (`/v1/{username}/domain_name`) needs to be your own username (e.g. `admin`), and the token is obtained in the previous step
+       You will get the following output with `token` and `username` if the request is successful
 
-     `cURL`:
+       ```bash
+       {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ", "username":"admin"}
+       ```
 
-     ```bash
-     curl --location --request POST 'http://127.0.0.1:50001/v1/admin/domain_name' \
-     --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ' \
-     --header 'Content-Type: application/json' \
-     --data-raw '{
-         "domain_name": "haomingsu.cn"
-     }'
-     ```
+    3. Add the domain name you need to monitor, note that the `{username}` in the url (`/v1/{username}/domain_name`) needs to be your own username (e.g. `admin`), and the token is obtained in the previous step
 
-     `wget`:
+       `cURL`:
 
-     ```bash
-     wget --no-check-certificate --quiet \
-       --method POST \
-       --timeout=0 \
+       ```bash
+       curl --location --request POST 'http://127.0.0.1:50001/v1/admin/domain_name' \
        --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ' \
        --header 'Content-Type: application/json' \
-       --body-data '{
-         "domain_name": "haomingsu.cn"
-     }' \
-        'http://127.0.0.1:50001/v1/admin/domain_name'
-     ```
+       --data-raw '{
+           "domain_name": "haomingsu.cn"
+       }'
+       ```
 
-     You will get the following output if the request is successful
+       `wget`:
 
-     ```bash
-     {"status":true, "domainName":"haomingsu.cn"}
-     ```
+       ```bash
+       wget --no-check-certificate --quiet \
+         --method POST \
+         --timeout=0 \
+         --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ' \
+         --header 'Content-Type: application/json' \
+         --body-data '{
+           "domain_name": "haomingsu.cn"
+       }' \
+          'http://127.0.0.1:50001/v1/admin/domain_name'
+       ```
 
-  4. Check the domain name is added, note that the `{username}` in the url (`/v1/{username}/domain_name`) needs to be your own username (e.g. `admin`), and the token is obtained in the first two steps
+       You will get the following output if the request is successful
 
-     `cURL`:
+       ```bash
+       {"status":true, "domainName":"haomingsu.cn"}
+       ```
 
-     ```bash
-     curl --location --request GET 'http://127.0.0.1:50001/v1/admin/domain_name' \
-     --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ'
-     ```
+    4. Check the domain name is added, note that the `{username}` in the url (`/v1/{username}/domain_name`) needs to be your own username (e.g. `admin`), and the token is obtained in the first two steps
 
-     `wget`:
+       `cURL`:
 
-     ```bash
-     wget --no-check-certificate --quiet \
-       --method GET \
-       --timeout=0 \
-       --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ' \
-        'http://127.0.0.1:50001/v1/admin/domain_name'
-     ```
+       ```bash
+       curl --location --request GET 'http://127.0.0.1:50001/v1/admin/domain_name' \
+       --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ'
+       ```
 
-     You will get the following output if the request is successful
+       `wget`:
 
-     ```bash
-     {"domainNames":["haomingsu.cn"]}
-     ```
+       ```bash
+       wget --no-check-certificate --quiet \
+         --method GET \
+         --timeout=0 \
+         --header 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImFkbWluIiwiaXNzIjoiMTI3LjAuMC4xIiwic3ViIjoidXNlciB0b2tlbiIsImV4cCI6MTY0MzEwNTY3MSwiaWF0IjoxNjQzMTAyMDcxfQ.EmYB_PApYocKSbdyT0ykUMPMJErMykv3AASBcYngJTQ' \
+          'http://127.0.0.1:50001/v1/admin/domain_name'
+       ```
+
+       You will get the following output if the request is successful
+
+       ```bash
+       {"domainNames":["haomingsu.cn"]}
+       ```
 
 ## Container Repository
 
-- Docker Hub: 
+- Docker Hub:
 
   ```bash
   docker pull hominsu/ali-ddns-client-service:latest
   docker pull hominsu/ali-ddns-server-service:latest
   ```
 
-- GitHub Container Repository: 
+- GitHub Container Repository:
 
   ```bash
   docker pull ghcr.io/hominsu/ali-ddns-client-service:latest
@@ -282,3 +478,34 @@ DDNS service by using Ali openapi
   docker pull registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-client-service:latest
   docker pull registry.cn-shenzhen.aliyuncs.com/hominsu/ali-ddns-server-service:latest
   ```
+
+## Other
+
+On the server-side, the logs are stored in the `ads/logs/ads.log`
+
+```bash
+[root@iZwz9diii276grug5qq3byZ ddns-server-service]# cat ads/logs/ads.log 
+2022-01-26T13:59:54.423+0800    info    runtime/proc.go:255     service.id: e4fd4c9652af, service.name: ali-ddns-server-service, service.version: 1.2.5, git sha1: a3936d5d8b6044bbbed686d6b2222c2c5813fa39, build stamp: 1643173896
+2022-01-26T13:59:54.428+0800    info    grpclog/grpclog.go:37   [core]original dial target is: "localhost:50003"        {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]parsed dial target is: {Scheme:localhost Authority: Endpoint:50003 URL:{Scheme:localhost Opaque:50003 User: Host: Path: RawPath: ForceQuery:false RawQuery: Fragment: RawFragment:}}    {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]fallback to scheme "passthrough"  {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]parsed dial target is: {Scheme:passthrough Authority: Endpoint:localhost:50003 URL:{Scheme:passthrough Opaque: User: Host: Path:/localhost:50003 RawPath: ForceQuery:false RawQuery: Fragment: RawFragment:}}   {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]Channel authority set to "localhost"      {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]ccResolverWrapper: sending update to cc: {[{localhost:50003  <nil> <nil> 0 <nil>}] <nil> <nil>} {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]ClientConn switching balancer to "pick_first"     {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]Channel switches to new LB policy "pick_first"    {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]Subchannel Connectivity change to CONNECTING      {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]Subchannel picks a new address "localhost:50003" to connect       {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]pickfirstBalancer: UpdateSubConnState: 0xc000171e40, {CONNECTING <nil>}   {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.429+0800    info    grpclog/grpclog.go:37   [core]Channel Connectivity change to CONNECTING {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.444+0800    info    grpclog/grpclog.go:37   [core]Subchannel Connectivity change to READY   {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.444+0800    info    grpclog/grpclog.go:37   [core]pickfirstBalancer: UpdateSubConnState: 0xc000171e40, {READY <nil>}        {"system": "grpc", "grpc_log": true}
+2022-01-26T13:59:54.444+0800    info    grpclog/grpclog.go:37   [core]Channel Connectivity change to READY      {"system": "grpc", "grpc_log": true}
+2022-01-26T14:13:57.084+0800    info    zap/server_interceptors.go:39   finished unary call with code OK        {"grpc.start_time": "2022-01-26T14:13:57+08:00", "system": "grpc", "span.kind": "server", "grpc.service": "server.service.v1.DomainService", "grpc.method": "GetDomainRecord", "grpc.code": "OK", "grpc.time_ms": 1.3580000400543213}
+2022-01-26T14:23:57.094+0800    info    zap/server_interceptors.go:39   finished unary call with code OK        {"grpc.start_time": "2022-01-26T14:23:57+08:00", "system": "grpc", "span.kind": "server", "grpc.service": "server.service.v1.DomainService", "grpc.method": "GetDomainRecord", "grpc.code": "OK", "grpc.time_ms": 1.2719999551773071}
+2022-01-26T14:33:44.731+0800    warn    grpclog/grpclog.go:46   [core]grpc: Server.Serve failed to create ServerTransport: connection error: desc = "ServerHandshake(\"47.103.37.203:36666\") failed: tls: client didn't provide a certificate"       {"system": "grpc", "grpc_log": true}
+2022-01-26T14:33:44.797+0800    warn    grpclog/grpclog.go:46   [core]grpc: Server.Serve failed to create ServerTransport: connection error: desc = "ServerHandshake(\"47.103.37.203:36682\") failed: tls: first record does not look like a TLS handshake"   {"system": "grpc", "grpc_log": true}
+2022-01-26T14:33:44.897+0800    warn    grpclog/grpclog.go:46   [core]grpc: Server.Serve failed to create ServerTransport: connection error: desc = "ServerHandshake(\"47.103.37.203:36696\") failed: tls: client didn't provide a certificate"       {"system": "grpc", "grpc_log": true}
+2022-01-26T14:33:44.954+0800    warn    grpclog/grpclog.go:46   [core]grpc: Server.Serve failed to create ServerTransport: connection error: desc = "ServerHandshake(\"47.103.37.203:36710\") failed: tls: first record does not look like a TLS handshake"   {"system": "grpc", "grpc_log": true}
+2022-01-26T14:33:57.008+0800    info    zap/server_interceptors.go:39   finished unary call with code OK        {"grpc.start_time": "2022-01-26T14:33:57+08:00", "system": "grpc", "span.kind": "server", "grpc.service": "server.service.v1.DomainService", "grpc.method": "GetDomainRecord", "grpc.code": "OK", "grpc.time_ms": 1.125}
+```
