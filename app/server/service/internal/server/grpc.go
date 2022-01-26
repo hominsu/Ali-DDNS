@@ -3,9 +3,12 @@ package server
 import (
 	v1 "Ali-DDNS/api/server/service/v1"
 	"Ali-DDNS/app/server/service/internal/service"
+	"Ali-DDNS/app/server/service/pkg/interceptor"
 	"Ali-DDNS/pkg"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -14,7 +17,7 @@ type DomainServer struct {
 }
 
 // NewDomainGRPCServer new a gRPC server.
-func NewDomainGRPCServer(service *service.DomainTaskService) (*DomainServer, error) {
+func NewDomainGRPCServer(service *service.DomainTaskService, logger *zap.Logger) (*DomainServer, error) {
 	var opts []grpc.ServerOption
 
 	// get the creds then append into the grpc options
@@ -26,11 +29,23 @@ func NewDomainGRPCServer(service *service.DomainTaskService) (*DomainServer, err
 	opts = append(opts, grpc.Creds(creds))
 
 	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-		grpc_recovery.StreamServerInterceptor(service.RecoveryInterceptor()),
+		grpc_zap.StreamServerInterceptor(
+			interceptor.ZapInterceptor(logger),
+			grpc_zap.WithLevels(interceptor.CodeLevel),
+		),
+		grpc_recovery.StreamServerInterceptor(
+			interceptor.RecoveryInterceptor(),
+		),
 	)))
 
 	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		grpc_recovery.UnaryServerInterceptor(service.RecoveryInterceptor()),
+		grpc_zap.UnaryServerInterceptor(
+			interceptor.ZapInterceptor(logger),
+			grpc_zap.WithLevels(interceptor.CodeLevel),
+		),
+		grpc_recovery.UnaryServerInterceptor(
+			interceptor.RecoveryInterceptor(),
+		),
 	)))
 
 	srv := grpc.NewServer(opts...)
@@ -44,7 +59,7 @@ type InterfaceServer struct {
 	*grpc.Server
 }
 
-func NewInterfaceGRPCServer(service *service.DDNSInterfaceService) (*InterfaceServer, error) {
+func NewInterfaceGRPCServer(service *service.DDNSInterfaceService, logger *zap.Logger) (*InterfaceServer, error) {
 	var opts []grpc.ServerOption
 
 	// get the creds then append into the grpc options
@@ -56,11 +71,23 @@ func NewInterfaceGRPCServer(service *service.DDNSInterfaceService) (*InterfaceSe
 	opts = append(opts, grpc.Creds(creds))
 
 	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-		grpc_recovery.StreamServerInterceptor(service.RecoveryInterceptor()),
+		grpc_zap.StreamServerInterceptor(
+			interceptor.ZapInterceptor(logger),
+			grpc_zap.WithLevels(interceptor.CodeLevel),
+		),
+		grpc_recovery.StreamServerInterceptor(
+			interceptor.RecoveryInterceptor(),
+		),
 	)))
 
 	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		grpc_recovery.UnaryServerInterceptor(service.RecoveryInterceptor()),
+		grpc_zap.UnaryServerInterceptor(
+			interceptor.ZapInterceptor(logger),
+			grpc_zap.WithLevels(interceptor.CodeLevel),
+		),
+		grpc_recovery.UnaryServerInterceptor(
+			interceptor.RecoveryInterceptor(),
+		),
 	)))
 
 	srv := grpc.NewServer(opts...)

@@ -4,15 +4,18 @@ import (
 	"Ali-DDNS/app/server/service/internal/biz"
 	"context"
 	terrors "github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type domainUserRepo struct {
-	data *Data
+	data   *Data
+	logger *zap.SugaredLogger
 }
 
-func NewDomainUserRepo(data *Data) biz.DomainUserRepo {
+func NewDomainUserRepo(data *Data, logger *zap.Logger) biz.DomainUserRepo {
 	return &domainUserRepo{
-		data: data,
+		data:   data,
+		logger: logger.Sugar(),
 	}
 }
 

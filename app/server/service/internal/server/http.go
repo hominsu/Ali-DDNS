@@ -6,6 +6,7 @@ import (
 	"Ali-DDNS/pkg"
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -14,7 +15,7 @@ type HttpServer struct {
 	GRPCCancel context.CancelFunc
 }
 
-func NewInterfaceHTTPServer() (*HttpServer, error) {
+func NewInterfaceHTTPServer(logger *zap.Logger) (*HttpServer, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	var opts []grpc.DialOption

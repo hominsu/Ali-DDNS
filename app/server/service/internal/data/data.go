@@ -5,7 +5,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/google/wire"
 	terrors "github.com/pkg/errors"
-	"log"
+	"go.uber.org/zap"
 )
 
 // ProviderSet is data providers.
@@ -26,7 +26,7 @@ func NewRedisClient() *redis.Client {
 }
 
 // NewData .
-func NewData(redisClient *redis.Client) (*Data, func(), error) {
+func NewData(redisClient *redis.Client, logger *zap.Logger) (*Data, func(), error) {
 	d := &Data{
 		db: redisClient,
 	}
@@ -36,9 +36,9 @@ func NewData(redisClient *redis.Client) (*Data, func(), error) {
 	}
 
 	cleanup := func() {
-		log.Println("closing the redis connect")
+		logger.Sugar().Infof("closing the redis connect...")
 		if err := d.db.Close(); err != nil {
-			log.Println(err)
+			logger.Sugar().Warnf("closing the redis connect failed, err: %v", err)
 		}
 	}
 

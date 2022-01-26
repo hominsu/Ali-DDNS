@@ -1,6 +1,9 @@
 package biz
 
-import "context"
+import (
+	"context"
+	"go.uber.org/zap"
+)
 
 type DomainUser struct {
 	Username   string
@@ -27,11 +30,15 @@ type DomainUserRepo interface {
 }
 
 type DomainUserUsecase struct {
-	repo DomainUserRepo
+	repo   DomainUserRepo
+	logger *zap.SugaredLogger
 }
 
-func NewDomainUserUsecase(repo DomainUserRepo) *DomainUserUsecase {
-	return &DomainUserUsecase{repo: repo}
+func NewDomainUserUsecase(repo DomainUserRepo, logger *zap.Logger) *DomainUserUsecase {
+	return &DomainUserUsecase{
+		repo:   repo,
+		logger: logger.Sugar(),
+	}
 }
 
 func (uc *DomainUserUsecase) AddUser(ctx context.Context, du *DomainUser) (bool, error) {

@@ -11,46 +11,47 @@ import (
 	"Ali-DDNS/app/server/service/internal/data"
 	"Ali-DDNS/app/server/service/internal/server"
 	"Ali-DDNS/app/server/service/internal/service"
+	"go.uber.org/zap"
 )
 
 // Injectors from wire.go:
 
 // initApp init ddns server application.
-func initApp() (*App, func(), error) {
+func initApp(logger *zap.Logger) (*App, func(), error) {
 	client := data.NewRedisClient()
-	dataData, cleanup, err := data.NewData(client)
+	dataData, cleanup, err := data.NewData(client, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	delayCheckRepo := data.NewDelayCheckRepo(dataData)
-	delayCheckUsecase := biz.NewDelayCheckUsecase(delayCheckRepo)
-	domainRecordRepo := data.NewDomainRecordRepo(dataData)
-	domainRecordUsecase := biz.NewDomainRecordUsecase(domainRecordRepo)
-	domainUserRepo := data.NewDomainUserRepo(dataData)
-	domainUserUsecase := biz.NewDomainUserUsecase(domainUserRepo)
-	domainTaskService := service.NewDomainTaskService(delayCheckUsecase, domainRecordUsecase, domainUserUsecase)
-	domainServer, err := server.NewDomainGRPCServer(domainTaskService)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	ddnsInterfaceService := service.NewDDNSInterfaceService(domainUserUsecase)
-	interfaceServer, err := server.NewInterfaceGRPCServer(ddnsInterfaceService)
+	delayCheckRepo := data.NewDelayCheckRepo(dataData, logger)
+	delayCheckUsecase := biz.NewDelayCheckUsecase(delayCheckRepo, logger)
+	domainRecordRepo := data.NewDomainRecordRepo(dataData, logger)
+	domainRecordUsecase := biz.NewDomainRecordUsecase(domainRecordRepo, logger)
+	domainUserRepo := data.NewDomainUserRepo(dataData, logger)
+	domainUserUsecase := biz.NewDomainUserUsecase(domainUserRepo, logger)
+	domainTaskService := service.NewDomainTaskService(delayCheckUsecase, domainRecordUsecase, domainUserUsecase, logger)
+	domainServer, err := server.NewDomainGRPCServer(domainTaskService, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	httpServer, err := server.NewInterfaceHTTPServer()
+	ddnsInterfaceService := service.NewDDNSInterfaceService(domainUserUsecase, logger)
+	interfaceServer, err := server.NewInterfaceGRPCServer(ddnsInterfaceService, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	cron, err := server.NewCronServer(domainTaskService)
+	httpServer, err := server.NewInterfaceHTTPServer(logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	app := newApp(domainServer, interfaceServer, httpServer, cron)
+	cron, err := server.NewCronServer(domainTaskService, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	app := newApp(domainServer, interfaceServer, httpServer, cron, logger)
 	return app, func() {
 		cleanup()
 	}, nil

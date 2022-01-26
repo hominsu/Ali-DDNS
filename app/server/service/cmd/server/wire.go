@@ -11,9 +11,10 @@ import (
 	"Ali-DDNS/app/server/service/internal/server"
 	"Ali-DDNS/app/server/service/internal/service"
 	"github.com/google/wire"
+	"go.uber.org/zap"
 )
 
 // initApp init ddns server application.
-func initApp() (*App, func(), error) {
+func initApp(logger *zap.Logger) (*App, func(), error) {
 	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, newApp))
 }
