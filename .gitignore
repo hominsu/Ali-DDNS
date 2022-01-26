@@ -2,3 +2,4 @@
 **/cert
 **/bin
 *.rdb
+*.log
