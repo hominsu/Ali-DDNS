@@ -71,7 +71,7 @@ DDNS service by using Ali openapi
   git clone --depth=1 https://github.com/hominsu/Ali-DDNS.git
   ```
 
-- Using openssl to generate SANs certs
+- The connections between the `client-side` and the `server-side` is authenticated via `tls`, so the relevant certificate must be created first, here using openssl to generate `SANs` certs
 
     1. Create CA's certs:
 
