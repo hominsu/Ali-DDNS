@@ -77,6 +77,7 @@ func (s *DomainTaskService) Check(ctx context.Context, domainName string) bool {
 	return false
 }
 
+// CheckAll check all domain names
 func (s *DomainTaskService) CheckAll(ctx context.Context) {
 	// get all domain names from Redis
 	domainNames, err := s.domainUserUsecase.GetAllDomainName(ctx, nil)

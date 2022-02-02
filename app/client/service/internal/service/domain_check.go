@@ -35,6 +35,7 @@ func (s *DomainCheckService) GetIpAddr(ctx context.Context) (string, error) {
 	return string(body), nil
 }
 
+// GetDomainRecord get a domain record via rpc from server
 func (s *DomainCheckService) GetDomainRecord(ctx context.Context, domainName string) (*DescribeDomainRecords.DRecords, error) {
 	domainRequest := &v1.DRRequest{DomainName: domainName}
 	resp, err := s.dataRepo.GetDomainRecord(ctx, domainRequest)
@@ -50,6 +51,7 @@ func (s *DomainCheckService) GetDomainRecord(ctx context.Context, domainName str
 	return records, nil
 }
 
+// UpdateDomainRecord update a domain record from server
 func (s *DomainCheckService) UpdateDomainRecord(ctx context.Context, domainName, recordId, rr, _type, value string) (*defs.Resp, error) {
 	updateRequest := &v1.UpdateDomainRequest{
 		DomainName: domainName,
@@ -69,6 +71,7 @@ func (s *DomainCheckService) UpdateDomainRecord(ctx context.Context, domainName,
 	}, nil
 }
 
+// Check get the domain info and check whether it's expired
 func (s *DomainCheckService) Check(ctx context.Context) (value string, _error error) {
 	// 查询 "haomingsu.cn" 的 DNS 解析信息
 

@@ -12,6 +12,7 @@ type DomainCheckService struct {
 	dataRepo *data.Data
 }
 
+// NewDomainCheckService new a domain check service
 func NewDomainCheckService(dataRepo *data.Data) *DomainCheckService {
 	return &DomainCheckService{
 		dataRepo: dataRepo,

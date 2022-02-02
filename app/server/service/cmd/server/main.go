@@ -58,7 +58,7 @@ type cronService struct {
 	serve  func(stop chan struct{}, cr *cron.Cron, logger *zap.Logger) error
 }
 
-// App contain grpc serve and gin http serve
+// App contain grpc serve and http serve
 type App struct {
 	domainGrpcService    *domainGrpcService
 	interfaceGrpcService *interfaceGrpcService

@@ -26,6 +26,7 @@ type User struct {
 	Password string `json:"password,omitempty"`
 }
 
+// GenToken generate the jwt token
 func GenToken(username string) (string, error) {
 	expireTime := jwt.NewNumericDate(time.Now().Add(time.Hour))
 	claims := &Claims{
@@ -47,6 +48,7 @@ func GenToken(username string) (string, error) {
 	return tokenString, nil
 }
 
+// ParseToken parse the jwt token
 func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	claims := &Claims{}
 
@@ -60,6 +62,7 @@ func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	return token, claims, nil
 }
 
+// CheckAuth check the user auth
 func CheckAuth(ctx context.Context) (string, error) {
 	tokenString := metautils.ExtractIncoming(ctx).Get(headerAuthorize)
 

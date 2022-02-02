@@ -6,6 +6,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+// NewProductionLogger new a zap logger
 func NewProductionLogger() *zap.Logger {
 	w := zapcore.AddSync(&lumberjack.Logger{
 		Filename:  "/logs/ads.log",

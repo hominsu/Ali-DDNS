@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 )
 
+// GetServerCreds obtain the server x509 creds from files
 func GetServerCreds() (credentials.TransportCredentials, error) {
 	cert, err := tls.LoadX509KeyPair("/cert/server.pem", "/cert/server.key")
 	if err != nil {
@@ -31,6 +32,7 @@ func GetServerCreds() (credentials.TransportCredentials, error) {
 	return creds, nil
 }
 
+// GetClientCreds obtain the client x509 creds from files
 func GetClientCreds() (credentials.TransportCredentials, error) {
 	cert, err := tls.LoadX509KeyPair("/cert/client.pem", "/cert/client.key")
 	if err != nil {

@@ -16,7 +16,7 @@ type DomainServer struct {
 	*grpc.Server
 }
 
-// NewDomainGRPCServer new a gRPC server.
+// NewDomainGRPCServer new a domain gRPC server.
 func NewDomainGRPCServer(service *service.DomainTaskService, logger *zap.Logger) (*DomainServer, error) {
 	var opts []grpc.ServerOption
 
@@ -26,8 +26,10 @@ func NewDomainGRPCServer(service *service.DomainTaskService, logger *zap.Logger)
 		return nil, err
 	}
 
+	// append the creds into the grpc options
 	opts = append(opts, grpc.Creds(creds))
 
+	// append the zap steam interceptor and recovery steam interceptor into the grpc options
 	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 		grpc_zap.StreamServerInterceptor(
 			interceptor.ZapInterceptor(logger),
@@ -38,6 +40,7 @@ func NewDomainGRPCServer(service *service.DomainTaskService, logger *zap.Logger)
 		),
 	)))
 
+	// append the zap unary interceptor and recovery unary interceptor into the grpc options
 	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		grpc_zap.UnaryServerInterceptor(
 			interceptor.ZapInterceptor(logger),
@@ -59,6 +62,7 @@ type InterfaceServer struct {
 	*grpc.Server
 }
 
+// NewInterfaceGRPCServer new a interface gRPC server
 func NewInterfaceGRPCServer(service *service.DDNSInterfaceService, logger *zap.Logger) (*InterfaceServer, error) {
 	var opts []grpc.ServerOption
 
@@ -70,6 +74,7 @@ func NewInterfaceGRPCServer(service *service.DDNSInterfaceService, logger *zap.L
 
 	opts = append(opts, grpc.Creds(creds))
 
+	// append the zap steam interceptor and recovery steam interceptor into the grpc options
 	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 		grpc_zap.StreamServerInterceptor(
 			interceptor.ZapInterceptor(logger),
@@ -80,6 +85,7 @@ func NewInterfaceGRPCServer(service *service.DDNSInterfaceService, logger *zap.L
 		),
 	)))
 
+	// append the zap unary interceptor and recovery unary interceptor into the grpc options
 	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		grpc_zap.UnaryServerInterceptor(
 			interceptor.ZapInterceptor(logger),

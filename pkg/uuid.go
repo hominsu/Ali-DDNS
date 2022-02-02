@@ -7,7 +7,7 @@ import (
 )
 
 // NewUUID
-// UUID 生成算法，这里随便用的 v4版本，就是伪随机，建议修改成 v1 或者 v2
+// UUID generation algorithm, here used v4 version, is pseudo random, recommended change to V1 or v2
 func NewUUID() (string, error) {
 	uuid := make([]byte, 16)
 	n, err := io.ReadFull(rand.Reader, uuid)
