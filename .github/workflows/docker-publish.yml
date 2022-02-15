@@ -4,9 +4,6 @@ on:
   push:
     tags: [ '*.*.*' ]
 
-env:
-  IMAGE_NAME: smart-ag-server-new
-
 jobs:
   set-matrix:
     runs-on: ubuntu-latest
@@ -71,18 +68,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Generate Changelog
+        run: |
+          current_tag=$(git tag -l --format "%(refname:strip=2)" | sort -r | sed -n '1p')
+          last_tag=$(git tag -l --format "%(refname:strip=2)" | sort -r | sed -n '2p')
+          git log --pretty=oneline --pretty=format:"%s%n%b" $last_tag...$current_tag > ${{ github.workspace }}-CHANGELOG.txt
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body: |
-            Changes Release ${{ github.ref }}
-            - First Change
-            - Second Change
-          draft: false
-          prerelease: false
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          generate_release_notes: true

@@ -11,11 +11,13 @@ import (
 	"strings"
 )
 
+// Register a user
 func (s *DDNSInterfaceService) Register(ctx context.Context, in *v1.RegisterReq) (*v1.RegisterReply, error) {
 	// get the username and password from http request header
 	username := in.GetUser().GetUsername()
 	password := in.GetUser().GetPassword()
 
+	// Check whether the username and password are empty
 	if strings.Trim(username, " ") == "" || strings.Trim(password, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username or password should not be empty")
 	}
@@ -42,10 +44,11 @@ func (s *DDNSInterfaceService) Register(ctx context.Context, in *v1.RegisterReq)
 	}
 }
 
+// Cancel a user
 func (s *DDNSInterfaceService) Cancel(ctx context.Context, in *v1.CancelReq) (*v1.CancelReply, error) {
 	// get the username from http request header
 	username := in.GetUsername()
-	if username == "" {
+	if strings.Trim(username, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username should not be empty")
 	}
 
@@ -77,6 +80,7 @@ func (s *DDNSInterfaceService) Cancel(ctx context.Context, in *v1.CancelReq) (*v
 	}
 }
 
+// Login .
 func (s *DDNSInterfaceService) Login(ctx context.Context, in *v1.LoginReq) (*v1.LoginReply, error) {
 	username := in.GetUser().GetUsername()
 	password := in.GetUser().GetPassword()
@@ -115,14 +119,16 @@ func (s *DDNSInterfaceService) Login(ctx context.Context, in *v1.LoginReq) (*v1.
 	}, nil
 }
 
+// Logout .
 func (s *DDNSInterfaceService) Logout(ctx context.Context, in *v1.LogoutReq) (*v1.LogoutReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 
+// ListDomainName list all domain-checks in redis
 func (s *DDNSInterfaceService) ListDomainName(ctx context.Context, in *v1.ListDomainNameReq) (*v1.ListDomainNameReply, error) {
 	username := in.GetUsername()
 
-	if username == "" {
+	if strings.Trim(username, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username should not be empty")
 	}
 
@@ -150,11 +156,12 @@ func (s *DDNSInterfaceService) ListDomainName(ctx context.Context, in *v1.ListDo
 	return reply, nil
 }
 
+// CreateDomainName create a domain-check
 func (s *DDNSInterfaceService) CreateDomainName(ctx context.Context, in *v1.CreateDomainNameReq) (*v1.CreateDomainNameReply, error) {
 	username := in.GetUsername()
 	domainName := in.GetDomainName()
 
-	if username == "" || domainName == "" {
+	if strings.Trim(username, " ") == "" || strings.Trim(domainName, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username or domain_name should not be empty")
 	}
 
@@ -181,11 +188,12 @@ func (s *DDNSInterfaceService) CreateDomainName(ctx context.Context, in *v1.Crea
 	}, nil
 }
 
+// DeleteDomainName delete a domain-check
 func (s *DDNSInterfaceService) DeleteDomainName(ctx context.Context, in *v1.DeleteDomainNameReq) (*v1.DeleteDomainNameReply, error) {
 	username := in.GetUsername()
 	domainName := in.GetDomainName()
 
-	if username == "" || domainName == "" {
+	if strings.Trim(username, " ") == "" || strings.Trim(domainName, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username or domain_name should not be empty")
 	}
 
@@ -212,10 +220,11 @@ func (s *DDNSInterfaceService) DeleteDomainName(ctx context.Context, in *v1.Dele
 	}, nil
 }
 
+// ListDevice list all devices in redis
 func (s *DDNSInterfaceService) ListDevice(ctx context.Context, in *v1.ListDeviceReq) (*v1.ListDeviceReply, error) {
 	username := in.GetUsername()
 
-	if username == "" {
+	if strings.Trim(username, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username should not be empty")
 	}
 
@@ -246,10 +255,11 @@ func (s *DDNSInterfaceService) ListDevice(ctx context.Context, in *v1.ListDevice
 	return reply, nil
 }
 
+// CreateDevice create a device
 func (s *DDNSInterfaceService) CreateDevice(ctx context.Context, in *v1.CreateDeviceReq) (*v1.CreateDeviceReply, error) {
 	username := in.GetUsername()
 
-	if username == "" {
+	if strings.Trim(username, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username should not be empty")
 	}
 
@@ -282,11 +292,12 @@ func (s *DDNSInterfaceService) CreateDevice(ctx context.Context, in *v1.CreateDe
 	}, nil
 }
 
+// DeleteDevice delete a device
 func (s *DDNSInterfaceService) DeleteDevice(ctx context.Context, in *v1.DeleteDeviceReq) (*v1.DeleteDeviceReply, error) {
 	username := in.GetUsername()
 	uuid := in.GetUuid()
 
-	if username == "" || uuid == "" {
+	if strings.Trim(username, " ") == "" || strings.Trim(uuid, " ") == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "username or uuid should not be empty")
 	}
 

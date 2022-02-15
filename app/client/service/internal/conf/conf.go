@@ -34,10 +34,12 @@ type envDef struct {
 	optionShowEachGetIp  string
 }
 
+// Basic .
 func Basic() *BasicConf {
 	return basic
 }
 
+// Option .
 func Option() *OptionConf {
 	return option
 }

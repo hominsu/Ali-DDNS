@@ -8,22 +8,27 @@ type BasicConf struct {
 	rpcPort    string // rpc 服务端口
 }
 
+// EndPoint .
 func (b *BasicConf) EndPoint() string {
 	return b.endpoint
 }
 
+// DomainName .
 func (b *BasicConf) DomainName() string {
 	return b.domainName
 }
 
+// RR .
 func (b *BasicConf) RR() string {
 	return b.rr
 }
 
+// RpcUrl .
 func (b *BasicConf) RpcUrl() string {
 	return b.rpcUrl
 }
 
+// RpcPort .
 func (b *BasicConf) RpcPort() string {
 	return b.rpcPort
 }

@@ -17,6 +17,7 @@ type Data struct {
 	v1.DomainServiceClient
 }
 
+// NewData new a data
 func NewData() (*Data, func(), error) {
 	creds, err := pkg.GetClientCreds()
 	if err != nil {

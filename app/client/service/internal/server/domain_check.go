@@ -9,6 +9,7 @@ import (
 	"log"
 )
 
+// NewCronServer new a cron server
 func NewCronServer(service *service.DomainCheckService) (*cron.Cron, error) {
 	// 新建一个定时器
 	cr := cron.New()
